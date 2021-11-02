@@ -11,7 +11,6 @@ La flota 1 tiene como objetivo cargar en la zona amarilla y descargar en la zona
 - Dos zonas de descarga. Zona norte (Zona Roja) y zona sur  (Zona Verde)
 - Un Casino (Zona café y Rosada)
 - Una interseccion. (Zona gris)
-- Distancias de zona de origen a la zona de descarga norte: 9 km, ida-vuelta = 18 km       
 
 # Variables:
 
