@@ -48,6 +48,7 @@ Velocidad máxima de los camiones es 44 km/hora = 0,37 pt/ticks
 Velocidad promedio de los camiones es 32 km/hora   = 0,27 pt/ticks
 1 fd =  1 patch = 0.5 km
 
+![alt text](https://github.com/mhjhr/MIA/blob/f8a924682e451c7f116e5ced85ebb0d90d1b9933/mundo%20a%20escala.png)
 
 
 Turno:
