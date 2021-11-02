@@ -28,7 +28,19 @@ La flota 1 tiene como objetivo cargar en la zona amarilla y descargar en la zona
 - 60 minutos/ 1 hora = 4x60 ticks = 240 ticks
 - 600 minutos /10 horas = 10x4x60 = 2400 ticks 
 - Turno comienza 8:00 - tick 0
-- 09:00 - tick 240,10:00 - tick 480, 11:00 - tick 720, etc.. (240 ticks * N )
+- 08:00 - tick 0 - Inicio de Turno
+- 09:00 - tick 240 
+- 10:00 - tick 480 
+- 11:00 - tick 720 
+- 12:00 - tick 960 
+- 13:00 - tick 1200 
+- 14:00 - tick 1440 
+- 15:00 - tick 1680 
+- 16:00 - tick 1920 
+- 17:00 - tick 2160 
+- 18:00 - tick 2400  
+- 19:00 - tick 2640 - inicio finalizacion del turno
+- 20:00 - tick 2880 - Fin turno - Puede ser que el turno termine unos minutos despues de las 20 horas.
 
 # Tiempos:
 
