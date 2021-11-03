@@ -109,7 +109,7 @@ Tiempo inicio de turno + fin de turno + perdida de la colcacion
 -  3.Tiempos de carga (Carga: numero de escavadoras por tiempo) 
 -  4.Tiempo descargas (Descarga: Frentes y por tiempo) 
 -  5.Inicio de turno (tiempo de preparación/inicio de turno)
--  6. Aviso de termino de turno (incluir slider con hora de aviso de termino de turno (19:00) )
+-  6.Aviso de termino de turno (incluir slider con hora de aviso de termino de turno (19:00) )
 -  7.Casino (slide con el tiempo delta)
 
 
