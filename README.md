@@ -102,4 +102,13 @@ La flota 1 tiene como objetivo cargar en la zona amarilla y descargar en la zona
 - Total Pérdida
 Tiempo inicio de turno + fin de turno + perdida de la colcacion
 
+# Escenarios a Validar:
+
+-  1.Velocidad de los camiones
+-  2.Proactividad: dejar cargado de camiones cargados al inicio del turno
+-  3.Tiempos de carga (Carga: numero de escavadoras por tiempo) 
+-  4.Tiempo descargas (Descarga: Frentes y por tiempo) 
+-  5.Inicio de turno (tiempo de preparación/inicio de turno), incluir slider con hora de aviso de termino de turno (19:00) 
+-  5.Casino (a evaluar)
+
 
