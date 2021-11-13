@@ -187,7 +187,8 @@ to setup-cars
     ;set xcor random-xcor
     set xcor -22
     set heading 90
-    set speed 0.27 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
+    ;set speed 0.27 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
+    set speed 0.53 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
     set speed-min 0
     set wait-time 0
     set return 0
@@ -221,7 +222,8 @@ to setup-cars
     set xcor -22
     set shape "truck"
     set heading 90
-    set speed 0.27 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
+    ;set speed 0.27 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
+    set speed 0.53 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
     set speed-min 0
     set wait-time 0
     set return 0
@@ -269,7 +271,7 @@ to setup_inicio_cars
   ask n-of camiones_cargados_inicio_flota1 turtles with [flota = 1] [ set cargado_inicio? true set xcor -21]   ;; selecciona al azar turtles cargadas al azar
   ask n-of camiones_cargados_inicio_flota2 turtles with [flota = 2] [ set cargado_inicio? true set xcor -21]   ;; selecciona al azar turtles cargadas al azar
 
-  ask turtles with [cargado_inicio? = false] [set ycor -1 set xcor  -20 set heading 270 set shape "truck-flip" ]
+  ask turtles with [cargado_inicio? = false] [set ycor -1 set xcor  -19 set heading 270 set shape "truck-flip" ]
 
   ask n-of  ((numero-de-camiones-flota1 + numero-de-camiones-flota2) * %_camiones_lentos / 100 ) turtles [ set lento? true set mi_velocidad_limite velocidad-limite-lentos  set speed speed * 0.9  ]   ;; selecciona al azar turtles lentas
 
@@ -314,7 +316,6 @@ to go
 
        set camiones_a_comer_flota1_t1 camiones_a_comer_flota1_t1 + 1
        set capacity_max_lunch_t1 capacity_max_lunch_t1 + 1
-       print capacity_max_lunch_t1
        set comer? true
        set color green
       ]
@@ -409,7 +410,6 @@ to go
 
        set camiones_a_comer_flota2_t1 camiones_a_comer_flota2_t1 + 1
        set capacity_max_lunch_t1 capacity_max_lunch_t1 + 1
-       print capacity_max_lunch_t1
        set comer? true
        set color orange
       ]
@@ -545,8 +545,6 @@ to go
      set downloading 1
     ]
       if wait-time-descarga = actual-time [
-      show wait-time-descarga
-      show actual-time
       set ycor -1
       set shape "truck-flip"
       rt 180
@@ -575,8 +573,6 @@ to go
           set uploading 1
         ]
         if wait-time-carga = actual-time [
-          show wait-time-carga
-          show actual-time
           set ycor 0
           set shape "truck"
           rt 180
@@ -629,8 +625,6 @@ to go
           set uploading 1
         ]
         if wait-time-carga = actual-time [
-          show wait-time-carga
-          show actual-time
           set ycor 0
           set shape "truck"
           rt 180
@@ -681,8 +675,6 @@ to go
      set uploading 1
     ]
       if wait-time-carga = actual-time [
-      show wait-time-carga
-      show actual-time
       set xcor 29
       set ycor -41
       set shape "truck-flip"
@@ -853,11 +845,11 @@ end
 GRAPHICS-WINDOW
 665
 -4
-1363
-588
+1448
+659
 -1
 -1
-11.9
+13.3621
 1
 10
 1
@@ -920,7 +912,7 @@ numero-de-camiones-flota1
 numero-de-camiones-flota1
 1
 41
-16.0
+15.0
 1
 1
 NIL
@@ -935,7 +927,7 @@ desaceleracion
 desaceleracion
 0
 .0099
-0.0026
+0.0099
 .0001
 1
 NIL
@@ -950,7 +942,7 @@ aceleracion
 aceleracion
 0
 .0099
-0.0026
+0.0099
 .0001
 1
 NIL
@@ -996,7 +988,7 @@ tiempo-min-de-carga
 tiempo-min-de-carga
 1
 60
-20.0
+14.0
 1
 1
 NIL
@@ -1011,7 +1003,7 @@ tiempo-min-de-descarga
 tiempo-min-de-descarga
 1
 60
-20.0
+10.0
 1
 1
 NIL
@@ -1026,7 +1018,7 @@ velocidad-limite
 velocidad-limite
 0
 1
-0.8
+0.7
 0.1
 1
 NIL
@@ -1059,7 +1051,7 @@ tiempo-max-de-carga
 tiempo-max-de-carga
 1
 100
-40.0
+18.0
 1
 1
 NIL
@@ -1074,7 +1066,7 @@ tiempo-max-de-descarga
 tiempo-max-de-descarga
 1
 100
-40.0
+22.0
 1
 1
 NIL
@@ -1196,7 +1188,7 @@ SLIDER
 %_camiones_lentos
 0
 25
-10.0
+15.0
 1
 1
 NIL
@@ -1266,7 +1258,7 @@ capacidad_maxima_casino
 capacidad_maxima_casino
 1
 50
-40.0
+16.0
 1
 1
 NIL
@@ -1314,7 +1306,7 @@ camiones_cargados_inicio_flota1
 camiones_cargados_inicio_flota1
 0
 50
-5.0
+1.0
 1
 1
 NIL
@@ -1329,7 +1321,7 @@ camiones_cargados_inicio_flota2
 camiones_cargados_inicio_flota2
 0
 100
-5.0
+3.0
 1
 1
 NIL
@@ -1344,7 +1336,7 @@ velocidad-limite-lentos
 velocidad-limite-lentos
 0
 1
-0.5
+0.7
 0.1
 1
 NIL
@@ -1827,7 +1819,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.1.1
+NetLogo 6.2.1
 @#$#@#$#@
 setup
 repeat 180 [ go ]
