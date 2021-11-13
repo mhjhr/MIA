@@ -1,3 +1,5 @@
+extensions [table csv]
+
 globals [
   sample-car
   actual-time
@@ -18,6 +20,11 @@ globals [
   capacity_max_lunch_t1
   capacity_max_lunch_t2
   number_car_finish
+  production
+  preparation
+  loading
+  launching
+  tb-memory
 ]
 
 turtles-own [
@@ -46,6 +53,7 @@ turtles-own [
   ready?;
   preparation_time
   mi_velocidad_limite
+  mi_velocidad_inicial
 
 ]
 
@@ -60,6 +68,7 @@ patches-own
 
 to setup
   clear-all
+
   ask patches [
 
     setup-road
@@ -157,6 +166,11 @@ to setup_descargas
   set num_descargas_zona_sur 0
   set temp_total_descargas 0
 
+  set production []
+  set preparation []
+  set loading []
+  set launching []
+
 end
 
 to setup_casino
@@ -208,6 +222,7 @@ to setup-cars
     set ready? false
     set preparation_time (40  + random 40) * 4 ; 1 minuto = 4 ticks
     set mi_velocidad_limite velocidad-limite
+    set mi_velocidad_inicial speed
     separate-cars
     record-data
     record-data-zona-descarga
@@ -243,6 +258,7 @@ to setup-cars
     set ready? false
     set preparation_time (40  + random 40) * 4 ; 1 minuto = 4 ticks
     set mi_velocidad_limite velocidad-limite
+    set mi_velocidad_inicial speed
     separate-cars
     record-data
     record-data-zona-descarga
@@ -273,13 +289,14 @@ to setup_inicio_cars
 
   ask turtles with [cargado_inicio? = false] [set ycor -1 set xcor  -19 set heading 270 set shape "truck-flip" ]
 
-  ask n-of  ((numero-de-camiones-flota1 + numero-de-camiones-flota2) * %_camiones_lentos / 100 ) turtles [ set lento? true set mi_velocidad_limite velocidad-limite-lentos  set speed speed * 0.9  ]   ;; selecciona al azar turtles lentas
+  ask n-of  ((numero-de-camiones-flota1 + numero-de-camiones-flota2) * %_camiones_lentos / 100 ) turtles [ set lento? true set mi_velocidad_limite velocidad-limite-lentos  set speed speed * 0.9 set mi_velocidad_inicial speed  ]   ;; selecciona al azar turtles lentas
 
 
 
 end
 
 to go
+
 
   ;; Stop simulation if all trucks are finalizaded work in the end of turn.
   if (number_car_finish = numero-de-camiones-flota1 + numero-de-camiones-flota2) [stop]
@@ -302,7 +319,7 @@ to go
 
   ; preparation time
 
-  ask turtles with [ready? = false ][ if actual-time >= preparation_time [set ready? true ] ]
+  ask turtles with [ready? = false ][ if actual-time >= preparation_time [set ready? true record-preparation who flota actual-time] ]
 
 
   ;; if there is a car right ahead of you, match its speed then slow down
@@ -312,7 +329,7 @@ to go
 
     if time_box = 4 and minutes >= 30 and minutes <= 60 and way = 0 and uploading != 1 and comido? = false and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= -12 [
 
-      if (capacity_max_lunch_t1 <= capacidad_maxima_casino ) [
+      if (capacity_max_lunch_t1 < capacidad_maxima_casino ) [
 
        set camiones_a_comer_flota1_t1 camiones_a_comer_flota1_t1 + 1
        set capacity_max_lunch_t1 capacity_max_lunch_t1 + 1
@@ -324,7 +341,7 @@ to go
 
      if time_box >= 6 and minutes >= 30 and way = 0 and uploading != 1 and comido? = false and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= -12 [
 
-      if (capacity_max_lunch_t2 <= capacidad_maxima_casino) [
+      if (capacity_max_lunch_t2 < capacidad_maxima_casino) [
 
        set camiones_a_comer_flota1_t2 camiones_a_comer_flota1_t2 + 1
        set capacity_max_lunch_t2 capacity_max_lunch_t2 + 1
@@ -340,7 +357,7 @@ to go
 
     ; Fleet 1's truck moving to downloading zone
 
-    if [ pcolor ] of patch-here != red and [ pcolor ] of patch-here != yellow [
+    if [ pcolor ] of patch-here != red and [ pcolor ] of patch-here != yellow and comiendo? != true [
       let car-ahead one-of turtles-on patch-ahead 1
        ifelse car-ahead != nobody
       [ slow-down-car car-ahead ]
@@ -365,6 +382,8 @@ to go
         set time_start_lunch actual-time
         set time_finish_lunch actual-time + 240 + random 60
 
+        record-launching who flota time_start_lunch time_finish_lunch
+
         ]
 
     ]
@@ -387,10 +406,9 @@ to go
         set heading 270
         set color blue
         set shape "truck-flip"
-        set speed mi_velocidad_limite
+        set speed mi_velocidad_inicial
         set comer? false
         set comido? true
-
 
 
     ]
@@ -406,7 +424,7 @@ to go
 
 
 
-       if (capacity_max_lunch_t1 <= capacidad_maxima_casino) [
+       if (capacity_max_lunch_t1 < capacidad_maxima_casino) [
 
        set camiones_a_comer_flota2_t1 camiones_a_comer_flota2_t1 + 1
        set capacity_max_lunch_t1 capacity_max_lunch_t1 + 1
@@ -420,7 +438,7 @@ to go
       if time_box >= 6 and minutes >= 30 and way = 0 and uploading != 1 and comido? = false and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= -12[
 
 
-       if (capacity_max_lunch_t1 <= capacidad_maxima_casino) [
+       if (capacity_max_lunch_t2 < capacidad_maxima_casino) [
 
        set camiones_a_comer_flota2_t2 camiones_a_comer_flota2_t2 + 1
        set capacity_max_lunch_t2 capacity_max_lunch_t2 + 1
@@ -436,7 +454,7 @@ to go
 
     ; Fleet 2's truck moving to downloading zone
 
-    if [ pcolor ] of patch-here != red and [ pcolor ] of patch-here != green and [ pcolor ] of patch-here != yellow [
+    if [ pcolor ] of patch-here != red and [ pcolor ] of patch-here != green and [ pcolor ] of patch-here != yellow and comiendo? != true [
       let car-ahead one-of turtles-on patch-ahead 1
        ifelse car-ahead != nobody
       [ slow-down-car car-ahead ]
@@ -499,6 +517,7 @@ to go
         set comiendo? true
         set time_start_lunch actual-time
         set time_finish_lunch actual-time + 240 + random 60
+        record-launching who flota time_start_lunch time_finish_lunch
 
         ]
 
@@ -521,7 +540,7 @@ to go
         set heading 270
         set color red
         set shape "truck-flip"
-        set speed mi_velocidad_limite
+        set speed mi_velocidad_inicial
         set comer? false
         set comiendo? false
         set comido? true
@@ -552,7 +571,11 @@ to go
       set downloading 0
       set way 0
       set num_descargas_zona_norte num_descargas_zona_norte  + 1
-      set speed mi_velocidad_limite
+      set speed mi_velocidad_inicial
+      record-production who flota 1 last-wait-time-descarga wait-time-descarga
+
+
+
       ]
     ]
   ]
@@ -579,7 +602,8 @@ to go
           set numero-viajes numero-viajes + 1
           set uploading 0
           set way 1
-          set speed mi_velocidad_limite
+          set speed mi_velocidad_inicial
+          record-loading who flota last-wait-time-carga wait-time-carga
         ]
       ]
 
@@ -631,7 +655,8 @@ to go
           set numero-viajes numero-viajes + 1
           set uploading 0
           set way 1
-          set speed mi_velocidad_limite
+          set speed mi_velocidad_inicial
+          record-loading who flota last-wait-time-carga wait-time-carga
         ]
      ]
 
@@ -683,7 +708,8 @@ to go
       set uploading 0
       set way 0
       set num_descargas_zona_sur  num_descargas_zona_sur + 1
-        set speed mi_velocidad_limite
+      set speed mi_velocidad_inicial
+      record-production who flota 1 last-wait-time-descarga wait-time-descarga
       ]
     ]
   ]
@@ -833,6 +859,77 @@ to record-data-zona-descarga  ;; turtle procedure
     set last-wait-time-descarga last-wait-time-descarga + 1
   ]
   [ set last-wait-time-descarga 0 ]
+end
+
+to record-production [quien zone down lw wt]
+
+    let prod []
+    set prod lput who prod ; Id turttle
+    set prod lput zone prod ; ID zone = 1 North Zone
+    set prod lput down prod  ; one download
+    set prod lput last-wait-time-descarga prod ; duration in ticks
+    set prod lput wait-time-descarga prod ; time in ticks
+    set production lput prod production
+
+
+end
+
+to record-preparation [quien fl time]
+
+    let prep []
+    set prep lput quien prep ; Id turttle
+    set prep lput fl prep ; ID zone = 1 North Zone
+    set prep lput time prep ; time in ticks
+    set preparation lput prep preparation
+end
+
+to record-loading [quien zone lw wt]
+
+    let prod []
+    set prod lput who prod ; Id turttle
+    set prod lput zone prod ; ID zone = 1 North Zone
+    set prod lput last-wait-time-carga prod ; duration in ticks
+    set prod lput wait-time-carga prod ; time in ticks
+    set loading lput prod loading
+end
+
+to record-launching [quien fl time_start time_finish]
+
+    let launch []
+    set launch lput who launch ; Id turttle
+    set launch lput flota launch ; ID zone = 1 North Zone
+    set launch lput time_start launch ; duration in ticks
+    set launch lput time_finish launch ; time in ticks
+    set launching lput launch launching
+
+
+end
+
+to simulation_report  ;; Report of main information of simulation
+
+  print "---Reporte de simulación---"
+  print "Tiempos de preparación:[Id tortuga, flota, tiempo preparacion]"
+  print preparation
+  print "Tiempos de carga: [Id tortuga, zona, duracion ticks, hora ticks]"
+  print loading
+  print "Tiempos de almuerzo: [Id tortuga, flota, hora inicio almuerzo ticks, hora fin almuerzo ticks]"
+  print  launching
+  print "Producción: [Id tortuga, zona, 1 descarga, duracion ticks, hora ticks]"
+  print production
+
+  ; create a file with results
+
+  ;set tb-memory table:from-list preparation
+  ;set tb-memory table:from-list [[1 2] [3 4] [5 6]]
+  ;file-open "simulation.csv"
+  ;file-print csv:to-string table:to-list tb-memory
+
+  csv:to-file "simulation-preparation.csv" preparation
+  csv:to-file "simulation-loading.csv" loading
+  csv:to-file "simulation-launching.csv" launching
+    csv:to-file "simulation-production.csv" production
+  print "Archivo creado!"
+
 end
 
 
@@ -1341,6 +1438,23 @@ velocidad-limite-lentos
 1
 NIL
 HORIZONTAL
+
+BUTTON
+575
+20
+652
+53
+Reporte
+simulation_report
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## QUE ES?
