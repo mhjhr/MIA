@@ -202,7 +202,7 @@ to setup-cars
     set xcor -22
     set heading 90
     ;set speed 0.27 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
-    set speed 0.53 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
+    set speed 0.7 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
     set speed-min 0
     set wait-time 0
     set return 0
@@ -238,7 +238,7 @@ to setup-cars
     set shape "truck"
     set heading 90
     ;set speed 0.27 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
-    set speed 0.53 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
+    set speed 0.7 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
     set speed-min 0
     set wait-time 0
     set return 0
@@ -393,7 +393,13 @@ to go
      ;; don't slow down below speed minimum or speed up beyond speed limit
     if speed < speed-min [ set speed speed-min ]
     if speed > mi_velocidad_limite [ set speed mi_velocidad_limite ]
-    fd speed
+    let nextpatch patch-ahead speed
+    ifelse [ pxcor ] of nextpatch > 20 [set xcor 20]
+      [ ifelse [ pxcor ] of nextpatch < -22 [set xcor -22]
+        [ ifelse [ pxcor ] of nextpatch < -20 and turno_finalizado? = false and way = 0 [set xcor -20]
+         [fd speed]]
+      ]
+
 
     ]
 
@@ -463,7 +469,7 @@ to go
     ]
 
       ;if is the intersection to downloading
-     if [ pxcor ] of patch-here = -8 and heading = 90 and comer? != true and way = 1[
+     if [ pxcor ] of patch-here >= -8 and [ pycor ] of patch-here = 0 and heading = 90 and comer? != true and way = 1[
 
       set xcor -8
       set heading 180
@@ -473,7 +479,7 @@ to go
 
 
        ;if is the intersection to left to downloading
-     if [ pxcor ] of patch-here = -8 and [ pycor ] of patch-here = -40 and heading = 180 and comer? != true and way = 1[
+     if [ pxcor ] of patch-here = -8 and [ pycor ] of patch-here <= -40 and heading = 180 and comer? != true and way = 1[
 
       set ycor -40
       set heading 90
@@ -482,7 +488,7 @@ to go
     ]
 
       ;if is the intersection to up to uploading
-     if [ pxcor ] of patch-here = -9 and [ pycor ] of patch-here = -41 and heading = 270 and way = 0[
+     if [ pxcor ] of patch-here <= -9 and [ pycor ] of patch-here = -41 and heading = 270 and way = 0[
 
       set xcor -9
       set heading 0
@@ -492,7 +498,7 @@ to go
 
 
      ;if is the intersection to uploading
-    if [ pxcor ] of patch-here = -9 and heading = 0 and [ pycor ] of patch-here = -1 [
+    if [ pxcor ] of patch-here = -9 and [ pycor] of patch-here >= -1  and heading = 0 and way = 0 [
 
       set ycor -1
       set heading 270
@@ -529,7 +535,13 @@ to go
     ;; don't slow down below speed minimum or speed up beyond speed limit
     if speed < speed-min [ set speed speed-min ]
     if speed > mi_velocidad_limite [ set speed mi_velocidad_limite ]
-    fd speed
+    let nextpatch patch-ahead speed
+    ifelse [ pxcor ] of nextpatch > 29 [set xcor 29 ]
+      [ifelse [ pxcor ] of nextpatch < -22 [set xcor -22 ]
+       [ifelse [ pxcor ] of nextpatch < -20 and turno_finalizado? = false and way = 0 [ set xcor -20 ]
+         [fd speed]]
+       ]
+
       ]
 
       ; end to first launch
@@ -1114,8 +1126,8 @@ SLIDER
 velocidad-limite
 velocidad-limite
 0
-1
-0.7
+2
+1.5
 0.1
 1
 NIL
@@ -1285,7 +1297,7 @@ SLIDER
 %_camiones_lentos
 0
 25
-15.0
+10.0
 1
 1
 NIL
@@ -1432,8 +1444,8 @@ SLIDER
 velocidad-limite-lentos
 velocidad-limite-lentos
 0
-1
-0.7
+2
+1.0
 0.1
 1
 NIL
