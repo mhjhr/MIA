@@ -1,13 +1,11 @@
 extensions [table csv]
 
 globals [
-  sample-car
   actual-time
   hours
   minutes
   seconds
   time_box
-  time_box_half
   counter_time
   num_descargas_zona_norte
   num_descargas_zona_sur
@@ -16,7 +14,6 @@ globals [
   camiones_a_comer_flota2_t1
   camiones_a_comer_flota1_t2
   camiones_a_comer_flota2_t2
-  Descargas1
   capacity_max_lunch_t1
   capacity_max_lunch_t2
   number_car_finish
@@ -25,6 +22,15 @@ globals [
   loading
   launching
   tb-memory
+  num_turtle
+  num_turtle_zn
+  num_turtle_zs
+  tail_uploading
+  tail_downloading_zn
+  tail_downloading_zs
+  next_truck_move
+  next_truck_move_zn
+  next_truck_move_zs
 ]
 
 turtles-own [
@@ -54,155 +60,63 @@ turtles-own [
   preparation_time
   mi_velocidad_limite
   mi_velocidad_inicial
-
+  reposo?
 ]
 
 patches-own
 [
-  roads
-  carguio
-  descarga
-  ceda_paso?
 ]
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; INICIALIZACION ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to setup
   clear-all
-
-  ask patches [
-
-    setup-road
-
-
-  ]
-
-
-    ask patches with [pxcor = -11 and pycor = -4]
-  [
-
-    set plabel "Casino"
-  ]
-
-    ask patches with [pxcor = -18 and pycor = -2]
-  [
-
-    set plabel "Zona Carga"
-  ]
-
-     ask patches with [pxcor = 24 and pycor = -2]
-  [
-
-    set plabel "Zona Norte Descarga"
-
-  ]
-
-     ask patches with [pxcor = 30 and pycor = -38]
-  [
-
-    set plabel "Zona Sur Descarga"
-
-  ]
-
-     ask patches with [pxcor = -41 and pycor = -2]
-  [
-
-    set plabel "Zona de Inicio - Preparación"
-
-  ]
-
+  ask patches [setup-road]
+  ask patches with [pxcor =   3 and pycor = -4] [set plabel " Casino"]
+  ask patches with [pxcor = -18 and pycor = -2] [set plabel "Zona Carga"]
+  ask patches with [pxcor =  24 and pycor = -2] [set plabel "Zona Norte Descarga"]
+  ask patches with [pxcor = 30 and pycor = -38] [set plabel "Zona Sur Descarga"]
+  ask patches with [pxcor = -41 and pycor = -2] [set plabel "Zona de Inicio - Preparación"]
   setup-cars
   setup-time
   setup_descargas
   setup_casino
-
-
-
-
   reset-ticks
 end
 
 to setup-road ;; patch procedure
-  if pycor < 2 and pycor = 0 and pxcor <= 20[ set pcolor white ]
-  if pycor < 0 and pycor > -2 and pxcor <= 20 [ set pcolor orange ]
-  if pycor < 1 and pycor > -2 and pxcor = 20 [set pcolor red]
-  if pycor < 1 and pycor > -2 and pxcor = -20 [set pcolor yellow]
+  if pycor < 2 and pycor = 0 and pxcor <= 23[ set pcolor white ]
+  if pycor < 0 and pycor > -2 and pxcor <= 23 [ set pcolor orange ]
+  if pycor < 1 and pycor > -2 and pxcor = 23 [set pcolor red]
+  if pycor < 1 and pycor > -2 and pxcor > -20 and pxcor < -17 [set pcolor yellow]
 
+  if pycor < 1 and pycor > -2 and pxcor = 6  [set pcolor grey]
+  if pycor < 1 and pycor > -2 and pxcor = 7  [set pcolor grey]
 
-  if pycor < 1 and pycor > -2 and pxcor = -9  [set pcolor grey]
-  if pycor < 1 and pycor > -2 and pxcor = -8  [set pcolor grey]
+  if pxcor = 6 and pycor < -1 and pycor >= -37 [ set pcolor orange ]
+  if pxcor = 7 and pycor < -1 and pycor >= -35 [ set pcolor white ]
 
-  if pxcor = -9 and pycor < -1 and pycor >= -41 [ set pcolor orange ]
-  if pxcor = -8 and pycor < -1 and pycor >= -41 [ set pcolor white ]
+  if pxcor > 1 and pxcor < 5 and pycor < -1 and pycor > -6 [set pcolor pink]
+  if pxcor = 3 and pycor = -2  [set pcolor brown]
 
-  ;if pxcor = -9 and pycor = -40 [set pcolor green]
-  ;if pxcor = -8 and pycor = -40 [set pcolor green]
+  if pxcor > 6  and pxcor < 31 and pycor = -36 [ set pcolor white ]
+  if pxcor >= 7  and pxcor < 31 and pycor = -37  [ set pcolor orange ]
 
-  ;if pxcor > 9 and pxcor < 15 and pycor < -1 and pycor > -6 [set pcolor pink]
-  if pxcor > -14 and pxcor < -10 and pycor < -1 and pycor > -6 [set pcolor pink]
-  if pxcor = -12 and pycor = -2  [set pcolor brown]
-
-  if pxcor > -8  and pxcor < 29 and pycor = -40 [ set pcolor white ]
-  if pxcor >= -8  and pxcor < 29 and pycor = -41  [ set pcolor orange ]
-
-  if pycor <= -40 and pycor >= -41 and pxcor = 29 [set pcolor green]
-
-
-
+  if pycor <= -36 and pycor >= -37 and pxcor = 31 [set pcolor green]
 end
-
-to setup-time
-
-  set hours 29
-  set minutes 0
-  set seconds 0
-  set counter_time 0
-  set time_box 0
-
-end
-
-to setup_descargas
-
-  set num_descargas_zona_norte 0
-  set num_descargas_zona_sur 0
-  set temp_total_descargas 0
-
-  set production []
-  set preparation []
-  set loading []
-  set launching []
-
-end
-
-to setup_casino
-
-  set capacity_max_lunch_t1 0
-  set capacity_max_lunch_t2 0
-  set camiones_a_comer_flota1_t1 0
-  set camiones_a_comer_flota2_t1 0
-  set camiones_a_comer_flota1_t2 0
-  set camiones_a_comer_flota2_t2 0
-  set number_car_finish 0
-
-end
-
 
 to setup-cars
-  if numero-de-camiones-flota1 > world-width [
-    user-message (word
-      "There are too many cars for the amount of road. "
-      "Please decrease the NUMBER-OF-CARS slider to below "
-      (world-width + 1) " and press the SETUP button again. "
-      "The setup has stopped.")
-    stop
-  ]
   set-default-shape turtles "truck"
-  create-turtles numero-de-camiones-flota1 [
+  create-turtles numero-de-camiones-flota1
+  [
     set color blue
-    ;set xcor random-xcor
+    set size 0.8
     set xcor -22
     set heading 90
     ;set speed 0.27 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
-    set speed 0.7 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
+    set speed random-normal 0.8 0.1       ; 32 km/hora = 0,27 pt/ticks
     set speed-min 0
     set wait-time 0
     set return 0
@@ -220,25 +134,24 @@ to setup-cars
     set time_finish_lunch 0
     set cargado_inicio? false
     set ready? false
-    set preparation_time (40  + random 40) * 4 ; 1 minuto = 4 ticks
+    ;set preparation_time (40  + random 40) * 4 ; 1 minuto = 4 ticks
+    set preparation_time random-normal 326 302
     set mi_velocidad_limite velocidad-limite
     set mi_velocidad_inicial speed
-    separate-cars
+    set reposo? false
     record-data
     record-data-zona-descarga
     record-data-zona-carga
-    ;ask n-of  ((numero-de-camiones-flota1 + numero-de-camiones-flota2) * %_camiones_lentos / 100 ) turtles [ set lento? true ]   ;; selecciona al azar turtles lentas
-
-
   ]
-
-   create-turtles numero-de-camiones-flota2 [
+  create-turtles numero-de-camiones-flota2
+  [
     set color red
+    set size 0.8
     set xcor -22
     set shape "truck"
     set heading 90
     ;set speed 0.27 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
-    set speed 0.7 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
+    set speed random-normal 0.8 0.1  ; 32 km/hora = 0,27 pt/ticks
     set speed-min 0
     set wait-time 0
     set return 0
@@ -256,51 +169,69 @@ to setup-cars
     set time_finish_lunch 0
     set cargado_inicio? false
     set ready? false
-    set preparation_time (40  + random 40) * 4 ; 1 minuto = 4 ticks
+    ;set preparation_time (40  + random 40) * 4 ; 1 minuto = 4 ticks
+    set preparation_time random-normal 326 302
     set mi_velocidad_limite velocidad-limite
     set mi_velocidad_inicial speed
-    separate-cars
+    set reposo? false
     record-data
     record-data-zona-descarga
     record-data-zona-carga
-
-
-
-
   ]
-
-   setup_inicio_cars
-
-end
-
-; this procedure is needed so when we click "Setup" we
-; don't end up with any two cars on the same patch
-to separate-cars ;; turtle procedure
-  ;if any? other turtles-here [
-   ; fd 1
-    ;separate-cars
-  ;]
+  setup_inicio_cars
 end
 
 to setup_inicio_cars
+  ask n-of camiones_cargados_inicio_flota1 turtles with [flota = 1] [ set cargado_inicio? true set xcor -20]   ;; selecciona al azar turtles cargadas al azar
+  ask n-of camiones_cargados_inicio_flota2 turtles with [flota = 2] [ set cargado_inicio? true set xcor -20]   ;; selecciona al azar turtles cargadas al azar
+  ask turtles with [cargado_inicio? = false] [set ycor -1 set xcor  -17 set heading 270 set shape "truck-flip" ]
+  ask n-of  ((numero-de-camiones-flota1 + numero-de-camiones-flota2) * %_camiones_lentos / 100 ) turtles [ set lento? true set mi_velocidad_limite velocidad-limite-lentos  set speed speed * 0.7 set mi_velocidad_inicial speed  ]   ;; selecciona al azar turtles lentas
+end
 
-  ask n-of camiones_cargados_inicio_flota1 turtles with [flota = 1] [ set cargado_inicio? true set xcor -21]   ;; selecciona al azar turtles cargadas al azar
-  ask n-of camiones_cargados_inicio_flota2 turtles with [flota = 2] [ set cargado_inicio? true set xcor -21]   ;; selecciona al azar turtles cargadas al azar
+to setup-time
+  set hours 29
+  set minutes 0
+  set seconds 0
+  set counter_time 0
+  set time_box 0
+end
 
-  ask turtles with [cargado_inicio? = false] [set ycor -1 set xcor  -19 set heading 270 set shape "truck-flip" ]
-
-  ask n-of  ((numero-de-camiones-flota1 + numero-de-camiones-flota2) * %_camiones_lentos / 100 ) turtles [ set lento? true set mi_velocidad_limite velocidad-limite-lentos  set speed speed * 0.9 set mi_velocidad_inicial speed  ]   ;; selecciona al azar turtles lentas
-
-
+to setup_descargas
+  set num_descargas_zona_norte 0
+  set num_descargas_zona_sur 0
+  set temp_total_descargas 0
+  set production []
+  set preparation []
+  set loading []
+  set launching []
+  set num_turtle 0
+  set num_turtle_zn 0
+  set num_turtle_zs 0
+  set tail_uploading []
+  set tail_downloading_zn []
+  set tail_downloading_zs []
+  set next_truck_move -1
+  set next_truck_move_zn -1
+  set next_truck_move_zs -1
 
 end
 
+to setup_casino
+  set capacity_max_lunch_t1 0
+  set capacity_max_lunch_t2 0
+  set camiones_a_comer_flota1_t1 0
+  set camiones_a_comer_flota2_t1 0
+  set camiones_a_comer_flota1_t2 0
+  set camiones_a_comer_flota2_t2 0
+  set number_car_finish 0
+end
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; SIMULACION ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 to go
-
 
   ;; Stop simulation if all trucks are finalizaded work in the end of turn.
   if (number_car_finish = numero-de-camiones-flota1 + numero-de-camiones-flota2) [stop]
-
 
   ;; Define plot variables segun horario
        ;; [8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37]
@@ -317,63 +248,42 @@ to go
   ;; Call the plotting procedure
   ;
 
-  ; preparation time
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; INICIO DE TURNO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ask turtles with [ready? = false ][ if actual-time >= preparation_time [set ready? true record-preparation who flota actual-time] ]
-
-
-  ;; if there is a car right ahead of you, match its speed then slow down
-
-
-  ask turtles with [flota = 1 and turno_finalizado? = false and ready? = true] [
-
-    if time_box = 4 and minutes >= 30 and minutes <= 60 and way = 0 and uploading != 1 and comido? = false and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= -12 [
-
-      if (capacity_max_lunch_t1 < capacidad_maxima_casino ) [
-
-       set camiones_a_comer_flota1_t1 camiones_a_comer_flota1_t1 + 1
-       set capacity_max_lunch_t1 capacity_max_lunch_t1 + 1
-       set comer? true
-       set color green
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FLOTA 1 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ask turtles with [flota = 1 and turno_finalizado? = false and ready? = true]
+  [
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; SI HAY UN CAMION DELANTE DESACELERA EN CASO CONTRARIO ACELERA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if [ pcolor ] of patch-here != red and [ pcolor ] of patch-here != yellow and comiendo? != true
+    [
+      let car-ahead one-of turtles-on patch-ahead 1.0
+      ifelse car-ahead != nobody [ slow-down-car car-ahead ] [ speed-up-car ] ;; otherwise, speed up
+    ]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; PRIMER TURNO DE ALMUERZO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if time_box >= 5 and time_box <= 6 and way = 0 and uploading != 1 and comido? = false and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= 3
+      [
+      if (capacity_max_lunch_t1 < capacidad_maxima_casino )
+        [
+        set camiones_a_comer_flota1_t1 camiones_a_comer_flota1_t1 + 1
+        set capacity_max_lunch_t1 capacity_max_lunch_t1 + 1
+        set comer? true
+        set color green
+        ]
       ]
-
-     ]
-
-     if time_box >= 6 and minutes >= 30 and way = 0 and uploading != 1 and comido? = false and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= -12 [
-
-      if (capacity_max_lunch_t2 < capacidad_maxima_casino) [
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; SEGUNDO TURNO DE ALMUERZO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if time_box >= 6 and way = 0 and uploading != 1 and comido? = false and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= 3
+      [
        set camiones_a_comer_flota1_t2 camiones_a_comer_flota1_t2 + 1
        set capacity_max_lunch_t2 capacity_max_lunch_t2 + 1
        set comer? true
        set color green
       ]
-
-     ]
-
-    record-data
-    record-data-zona-descarga
-    record-data-zona-carga
-
-    ; Fleet 1's truck moving to downloading zone
-
-    if [ pcolor ] of patch-here != red and [ pcolor ] of patch-here != yellow and comiendo? != true [
-      let car-ahead one-of turtles-on patch-ahead 1
-       ifelse car-ahead != nobody
-      [ slow-down-car car-ahead ]
-      [ speed-up-car ] ;; otherwise, speed up
-
-    ]
-
-
-    ;; Trucks to lunch
-
-     if comer? = true [
-
-
-      ; hacia la izquierda a la zona de carga y antes del casino
-      if [ pxcor ] of patch-here = -12 and [ pycor ] of patch-here = -1 and heading = 270 [
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; INGRESO A CASINO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if comer? = true
+      [
+      if [ pxcor ] of patch-here = 3 and [ pycor ] of patch-here = -1 and heading = 270 ; hacia la izquierda a la zona de carga y antes del casino
+       [
         set heading 180
         set shape "truck abajo"
         fd 2
@@ -381,141 +291,119 @@ to go
         set comiendo? true
         set time_start_lunch actual-time
         set time_finish_lunch actual-time + 240 + random 60
-
         record-launching who flota time_start_lunch time_finish_lunch
-
-        ]
-
-    ]
-
-    if comiendo? != true[
-
-     ;; don't slow down below speed minimum or speed up beyond speed limit
-    if speed < speed-min [ set speed speed-min ]
-    if speed > mi_velocidad_limite [ set speed mi_velocidad_limite ]
-    let nextpatch patch-ahead speed
-    ifelse [ pxcor ] of nextpatch > 20 [set xcor 20]
-      [ ifelse [ pxcor ] of nextpatch < -22 [set xcor -22]
-        [ ifelse [ pxcor ] of nextpatch < -20 and turno_finalizado? = false and way = 0 [set xcor -20]
-         [fd speed]]
+       ]
+      ]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; SALIDA DE CASINO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if comiendo? = true and time_finish_lunch < actual-time     ; finish launch
+      [
+      set comiendo? false
+      set xcor 3
+      set ycor -1
+      set heading 270
+      set color blue
+      set shape "truck-flip"
+      set speed mi_velocidad_inicial
+      set comer? false
+      set comido? true
       ]
 
 
-    ]
+; ANTES DE LLEGAR A LA ZONA DE CARGA, SI HAY N CAMIONES CARGANDO REPOSA EN LA ZONA DESCARGA POS X -18, Y -1
 
-    ; finish launch
-    if comiendo? = true and time_finish_lunch < actual-time [
+      if [pxcor] of patch-ahead 1 = -19 and [pycor] of patch-ahead 1 = -1 and heading = 270 and count turtles with [uploading = 1 and pxcor = -19 and pycor = -1] >= max_camiones_carga and reposo? = false
+      [ set color black set speed 0 set reposo? true  set tail_uploading lput who tail_uploading set xcor -18 set ycor -1]
 
-        set comiendo? false
-        set xcor -12
-        set ycor -1
-        set heading 270
-        set color blue
-        set shape "truck-flip"
-        set speed mi_velocidad_inicial
-        set comer? false
-        set comido? true
+ ; ANTES DE LLEGAR A LA ZONA DE DESCARGA, SI HAY N CAMIONES DESCARGANDO REPOSA EN LA ZONA DESCARGA POS X 22, Y 0
+
+      if [pxcor] of patch-ahead 1 = 23 and [pycor] of patch-ahead 1 = 0 and heading = 90 and count turtles with [downloading = 1 and pxcor = 23 and pycor = 0] >= max_camiones_desc_zn and reposo? = false
+      [ set color black set speed 0 set reposo? true  set tail_downloading_zn lput who tail_downloading_zn set xcor 22 set ycor 0]
 
 
-    ]
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; CAMION AVANZA Y AJUSTA SU VELOCIDAD  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if comiendo? != true and reposo? = false
+      [
 
+      if speed < speed-min [ set speed speed-min ]
+      if speed > mi_velocidad_limite [ set speed mi_velocidad_limite ]
+      fd speed
 
-    ]
-
-
-  ask turtles with [flota = 2 and turno_finalizado? = false and ready? = true] [
-
-   ; From 12:30 hrs to 13:00 hrs trucks to start to go to lunch center
-    if time_box = 4 and minutes >= 30 and minutes <= 60 and way = 0 and uploading != 1 and comido? = false  and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= -12 [
-
-
-
-       if (capacity_max_lunch_t1 < capacidad_maxima_casino) [
-
-       set camiones_a_comer_flota2_t1 camiones_a_comer_flota2_t1 + 1
-       set capacity_max_lunch_t1 capacity_max_lunch_t1 + 1
-       set comer? true
-       set color orange
       ]
-
-     ]
-      ; rest of trucks go to lunch from 14:30 hrs.
-
-      if time_box >= 6 and minutes >= 30 and way = 0 and uploading != 1 and comido? = false and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= -12[
-
-
-       if (capacity_max_lunch_t2 < capacidad_maxima_casino) [
-
-       set camiones_a_comer_flota2_t2 camiones_a_comer_flota2_t2 + 1
-       set capacity_max_lunch_t2 capacity_max_lunch_t2 + 1
-       set comer? true
-       set color orange
-      ]
-
-     ]
-
     record-data
     record-data-zona-descarga
     record-data-zona-carga
+  ]
 
-    ; Fleet 2's truck moving to downloading zone
 
-    if [ pcolor ] of patch-here != red and [ pcolor ] of patch-here != green and [ pcolor ] of patch-here != yellow and comiendo? != true [
-      let car-ahead one-of turtles-on patch-ahead 1
-       ifelse car-ahead != nobody
-      [ slow-down-car car-ahead ]
-      [ speed-up-car ] ;; otherwise, speed up
 
-    ]
 
-      ;if is the intersection to downloading
-     if [ pxcor ] of patch-here >= -8 and [ pycor ] of patch-here = 0 and heading = 90 and comer? != true and way = 1[
 
-      set xcor -8
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FIN FLOTA 1 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FLOTA 2 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ask turtles with [flota = 2 and turno_finalizado? = false and ready? = true]
+  [
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; SI HAY UN CAMION DELANTE DESACELERA EN CASO CONTRARIO ACELERA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if [ pcolor ] of patch-here != green and [ pcolor ] of patch-here != yellow and comiendo? != true
+      [
+      let car-ahead one-of turtles-on patch-ahead 1.0
+       ifelse car-ahead != nobody [ slow-down-car car-ahead ] [ speed-up-car ] ;; otherwise, speed up
+      ]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; CAMBIO DE DIRECCION EN PRIMERA INTERSECCION IDA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if [ pxcor ] of patch-here = 7 and heading = 90 and comer? != true and way = 1
+      [
+      set xcor 7
       set heading 180
       set shape "truck abajo"
-
-    ]
-
-
-       ;if is the intersection to left to downloading
-     if [ pxcor ] of patch-here = -8 and [ pycor ] of patch-here <= -40 and heading = 180 and comer? != true and way = 1[
-
-      set ycor -40
+      ]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; CAMBIO DE DIRECCION EN SEGUNDA INTERSECCION IDA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if [ pxcor ] of patch-here = 7 and [ pycor ] of patch-here = -36 and heading = 180 and comer? != true and way = 1
+      [
+      set ycor -36
       set heading 90
       set shape "truck"
-
-    ]
-
-      ;if is the intersection to up to uploading
-     if [ pxcor ] of patch-here <= -9 and [ pycor ] of patch-here = -41 and heading = 270 and way = 0[
-
-      set xcor -9
-      set heading 0
-      set shape "truck arriba"
-
-    ]
-
-
-     ;if is the intersection to uploading
-    if [ pxcor ] of patch-here = -9 and [ pycor] of patch-here >= -1  and heading = 0 and way = 0 [
-
+      ]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; CAMBIO DE DIRECCION EN PRIMERA INTERSECCION VUELTA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     if [ pxcor ] of patch-here = 6 and [ pycor ] of patch-here = -37 and heading = 270 and way = 0
+       [
+       set xcor 6
+       set heading 0
+       set shape "truck arriba"
+       ]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; CAMBIO DE DIRECCION EN SEGUNDA INTERSECCION VUELTA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if [ pxcor ] of patch-here = 6 and heading = 0 and [ pycor ] of patch-here = -1
+      [
       set ycor -1
       set heading 270
       set shape "truck-flip"
-
-
-    ]
-
-
-      ;; Trucks to lunch
-
-     if comer? = true [
-
-
-      ; hacia la izquierda a la zona de carga y antes del casino
-      if [ pxcor ] of patch-here = -12 and [ pycor ] of patch-here = -1 and heading = 270 [
-
+      ]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; PRIMER TURNO DE ALMUERZO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if time_box >= 5 and time_box <= 6 and way = 0 and uploading != 1 and comido? = false  and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= 3
+      [
+      if (capacity_max_lunch_t1 < capacidad_maxima_casino)
+        [
+        set camiones_a_comer_flota2_t1 camiones_a_comer_flota2_t1 + 1
+        set capacity_max_lunch_t1 capacity_max_lunch_t1 + 1
+        set comer? true
+        set color black
+        ]
+      ]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; SEGUNDO TURNO DE ALMUERZO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if time_box >= 6 and way = 0 and uploading != 1 and comido? = false and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= 3
+      [
+       set camiones_a_comer_flota2_t2 camiones_a_comer_flota2_t2 + 1
+       set capacity_max_lunch_t2 capacity_max_lunch_t2 + 1
+       set comer? true
+       set color black
+      ]
+    ;record-data
+    ;record-data-zona-descarga
+    ;record-data-zona-carga
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; INGRESO A CASINO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if comer? = true
+      [
+      if [ pxcor ] of patch-here = 3 and [ pycor ] of patch-here = -1 and heading = 270       ; hacia la izquierda a la zona de carga y antes del casino
+        [
         set heading 180
         set shape "truck abajo"
         fd 2
@@ -524,324 +412,308 @@ to go
         set time_start_lunch actual-time
         set time_finish_lunch actual-time + 240 + random 60
         record-launching who flota time_start_lunch time_finish_lunch
-
         ]
-
-    ]
-
-
-    if comiendo? != true[
-
-    ;; don't slow down below speed minimum or speed up beyond speed limit
-    if speed < speed-min [ set speed speed-min ]
-    if speed > mi_velocidad_limite [ set speed mi_velocidad_limite ]
-    let nextpatch patch-ahead speed
-    ifelse [ pxcor ] of nextpatch > 29 [set xcor 29 ]
-      [ifelse [ pxcor ] of nextpatch < -22 [set xcor -22 ]
-       [ifelse [ pxcor ] of nextpatch < -20 and turno_finalizado? = false and way = 0 [ set xcor -20 ]
-         [fd speed]]
-       ]
-
+      ]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; SALIDA DE CASINO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if comiendo? = true  and time_finish_lunch < actual-time
+      [
+      set xcor 3
+      set ycor -1
+      set heading 270
+      set color red
+      set shape "truck-flip"
+      set speed mi_velocidad_inicial
+      set comer? false
+      set comiendo? false
+      set comido? true
       ]
 
-      ; end to first launch
-    if comiendo? = true  and time_finish_lunch < actual-time [
 
-        set xcor -12
+; ANTES DE LLEGAR A LA ZONA DE CARGA X -19, Y -1, SI HAY N CAMIONES CARGANDO REPOSA EN LA ZONA DESCARGA POS X -18, Y -1
+
+      if [pxcor] of patch-ahead 1 = -19 and [pycor] of patch-ahead 1 = -1 and heading = 270 and count turtles with [uploading = 1 and pxcor = -19 and pycor = -1] >= max_camiones_carga and reposo? = false
+      [ set color black set speed 0 set reposo? true  set tail_uploading lput who tail_uploading set xcor -18 set ycor -1] ; set turn of trucks at repose zone
+
+; ANTES DE LLEGAR A LA ZONA DE DESCARGA, SI HAY N CAMIONES DESCARGANDO REPOSA EN LA ZONA DESCARGA SUR POS X 30, Y -36
+
+      if [pxcor] of patch-ahead 1 = 30 and [pycor] of patch-ahead 1 = -36 and heading = 90 and count turtles with [downloading = 1 and pxcor = 31 and pycor = -36] >= max_camiones_desc_zn and reposo? = false
+      [ set color black set speed 0 set reposo? true  set tail_downloading_zn lput who tail_downloading_zn set xcor 30 set ycor -36]
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; CAMION AVANZA Y AJUSTA SU VELOCIDAD ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    if comiendo? != true and reposo? = false        ;; don't slow down below speed minimum or speed up beyond speed limit
+      [
+
+      if speed < speed-min [ set speed speed-min ]
+      if speed > mi_velocidad_limite [ set speed mi_velocidad_limite ]
+      fd speed
+      ]
+
+
+
+    record-data
+    record-data-zona-descarga
+    record-data-zona-carga
+  ]  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FIN FLOTA 2 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FLOTA 1 EN ZONA DE DESCARGA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ask patches with [pycor = 0 and pxcor = 23 ]
+  [
+    ask turtles-here with [flota = 1 and ready? = true]
+    [
+      if downloading = 0
+      [
+        set color pink
+        set speed 0
+        set last-wait-time-descarga tiempo-min-de-descarga + random (tiempo-max-de-descarga - tiempo-min-de-descarga)
+        set wait-time-descarga actual-time + last-wait-time-descarga
+        set downloading 1
+      ]
+      if wait-time-descarga = actual-time
+      [
+        set xcor 23
         set ycor -1
-        set heading 270
-        set color red
         set shape "truck-flip"
+        set color blue
+        ;rt 180
+        set heading 270
+        set numero-viajes numero-viajes + 1
+        set downloading 0
+        set way 0
+        set num_descargas_zona_norte num_descargas_zona_norte  + 1
         set speed mi_velocidad_inicial
-        set comer? false
-        set comiendo? false
-        set comido? true
-
-
-    ]
-
-
-
-    ]
-
-  ; Fleet 1's truck at downloading zone
-  ask patches with [pycor = 0 and pxcor = 20 ] [
-    ask turtles-here with [ready? = true][
-
-
-     if downloading = 0 [
-     set speed 0
-     set last-wait-time-descarga tiempo-min-de-descarga + random (tiempo-max-de-descarga - tiempo-min-de-descarga)
-     set wait-time-descarga actual-time +  last-wait-time-descarga
-     set downloading 1
-    ]
-      if wait-time-descarga = actual-time [
-      set ycor -1
-      set shape "truck-flip"
-      rt 180
-      set numero-viajes numero-viajes + 1
-      set downloading 0
-      set way 0
-      set num_descargas_zona_norte num_descargas_zona_norte  + 1
-      set speed mi_velocidad_inicial
-      record-production who flota 1 last-wait-time-descarga wait-time-descarga
-
-
-
+        record-production who flota 1 last-wait-time-descarga wait-time-descarga
       ]
     ]
   ]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FLOTA 2 EN ZONA DE DESCARGA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ask patches with [pycor = -36 and pxcor = 31]
+  [
+    ask turtles-here with [flota = 2 and ready? = true]
+    [
 
-  ;Fleet 1's truck at uploading zone
-  ask patches with [pycor = -1 and pxcor = -20] [
-    ask turtles-here with [flota = 1 and ready? = true][
+      if downloading = 0
+      [
+        set color pink
+        set speed 0
+        set last-wait-time-descarga tiempo-min-de-descarga + random (tiempo-max-de-descarga - tiempo-min-de-descarga)
+        set wait-time-descarga actual-time + last-wait-time-descarga
+        set downloading 1
+      ]
+      if wait-time-descarga = actual-time
+      [
+        set xcor 31
+        set ycor -37
+        set shape "truck-flip"
+        set color red
+        set heading 270
+        set numero-viajes numero-viajes + 1
+        set downloading 0
+        set way 0
+        set num_descargas_zona_sur  num_descargas_zona_sur + 1
+        set speed mi_velocidad_inicial
+        record-production who flota 1 last-wait-time-descarga wait-time-descarga
+      ]
+    ]
+  ]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FLOTA 1 EN ZONA DE CARGA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-      if time_box < 11 and turno_finalizado? = false [
 
-        if comer? != true [
-         set color blue
+  ask patches with [pycor = -1 and pxcor = -19]
+  [
 
-        if uploading = 0 [
-          set speed 0
-          set last-wait-time-carga tiempo-min-de-carga + random (tiempo-max-de-carga - tiempo-min-de-carga)
-          set wait-time-carga actual-time + last-wait-time-carga
-          set uploading 1
+    ask turtles-here with [flota = 1 and ready? = true]
+    [
+      if time_box < 10 and turno_finalizado? = false
+      [
+        if comer? != true
+        [
+
+          if uploading = 0
+          [
+            set color pink
+            set speed 0
+            set last-wait-time-carga tiempo-min-de-carga + random (tiempo-max-de-carga - tiempo-min-de-carga)
+            set wait-time-carga actual-time + last-wait-time-carga
+            set uploading 1
+          ]
+
+
+          if wait-time-carga = actual-time
+          [
+            set ycor 0
+            set shape "truck"
+            rt 180
+            set numero-viajes numero-viajes + 1
+            set uploading 0
+            set way 1
+            set color blue
+            set speed mi_velocidad_inicial
+            record-loading who flota last-wait-time-carga wait-time-carga
+          ]
         ]
-        if wait-time-carga = actual-time [
+        if comer? = true
+        [
           set ycor 0
           set shape "truck"
+          set color green
           rt 180
-          set numero-viajes numero-viajes + 1
-          set uploading 0
-          set way 1
-          set speed mi_velocidad_inicial
-          record-loading who flota last-wait-time-carga wait-time-carga
         ]
       ]
-
-      if comer? = true [
-
-        set ycor 0
-        set shape "truck"
-        set color green
-        rt 180
-      ]
-
-      ]
-
-      if time_box >= 11 and turno_finalizado? != true [
-
+      if time_box >= 10 and turno_finalizado? != true    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FINALIZACION DEL TURNO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      [
         set turno_finalizado? true
         set xcor -22
         set number_car_finish  number_car_finish + 1
-
-
       ]
-
-
-
-
     ]
-
   ]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FLOTA 2 EN ZONA DE CARGA ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-   ;Fleet 2's truck at uploading zone
-  ask patches with [pycor = -1 and pxcor = -20] [
-    ask turtles-here with [flota = 2 and ready? = true][
 
-     if time_box < 11 and turno_finalizado? = false [
+  ask patches with [pycor = -1 and pxcor = -19]
+  [
 
-     if comer? != true [
-        set color red
-        if uploading = 0 [
-          set speed 0
-          set last-wait-time-carga tiempo-min-de-carga + random (tiempo-max-de-carga - tiempo-min-de-carga)
-          set wait-time-carga actual-time + last-wait-time-carga
-          set uploading 1
+    ask turtles-here with [flota = 2 and ready? = true]
+    [
+      if time_box < 10 and turno_finalizado? = false
+      [
+        if comer? != true
+        [
+
+          if uploading = 0
+          [
+            set color pink
+            set speed 0
+            set last-wait-time-carga tiempo-min-de-carga + random (tiempo-max-de-carga - tiempo-min-de-carga)
+            set wait-time-carga actual-time + last-wait-time-carga
+            set uploading 1
+          ]
+
+          if wait-time-carga = actual-time
+          [
+            set ycor 0
+            set shape "truck"
+            rt 180
+            set numero-viajes numero-viajes + 1
+            set uploading 0
+            set way 1
+            set color red
+            set speed mi_velocidad_inicial
+            record-loading who flota last-wait-time-carga wait-time-carga
+          ]
         ]
-        if wait-time-carga = actual-time [
-          set ycor 0
-          set shape "truck"
-          rt 180
-          set numero-viajes numero-viajes + 1
-          set uploading 0
-          set way 1
-          set speed mi_velocidad_inicial
-          record-loading who flota last-wait-time-carga wait-time-carga
-        ]
-     ]
-
-        if comer? = true [
-
+        if comer? = true
+        [
           set ycor 0
           set shape "truck"
           set color orange
           rt 180
-
-
         ]
       ]
-
-       if time_box >= 11 and turno_finalizado? != true [
-
+      if time_box >= 10 and turno_finalizado? != true    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FINALIZACION DEL TURNO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      [
         set turno_finalizado? true
         set xcor -22
         set number_car_finish  number_car_finish + 1
-
-      ]
-
-
-
-
-
-    ]
-
-  ]
-
-    ; Fleet 2's truck at downloading zone
-
-  ask patches with [pycor = -40 and pxcor = 29] [
-    ask turtles-here with [flota = 2 and ready? = true][
-
-     set color red
-     if uploading = 0 [
-     set speed 0
-     set last-wait-time-carga tiempo-min-de-carga + random (tiempo-max-de-carga - tiempo-min-de-carga)
-     set wait-time-carga actual-time + last-wait-time-carga
-     set uploading 1
-    ]
-      if wait-time-carga = actual-time [
-      set xcor 29
-      set ycor -41
-      set shape "truck-flip"
-      set heading 270
-      set numero-viajes numero-viajes + 1
-      set uploading 0
-      set way 0
-      set num_descargas_zona_sur  num_descargas_zona_sur + 1
-      set speed mi_velocidad_inicial
-      record-production who flota 1 last-wait-time-descarga wait-time-descarga
       ]
     ]
   ]
-
-
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; PROCEDIMIENTO DE TIEMPO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   tick
   set actual-time ticks
-
-
   ; set actual hours, minutes and seconds
   ; Turno comienza 8:00 - tick 0
   ; 1 segundo = 1/15 ticks
   ; 1 minuto = 4 ticks
   ; 60 minutos/ 1 hora = 4x60 ticks = 240 ticks
 
-
   set seconds 15 + seconds
-  if seconds = 60 [
-
+  if seconds = 60
+  [
     set seconds 0
     set minutes minutes + 1
-    if minutes = 60 [
-
+    if minutes = 60
+    [
       set minutes 0
       set hours hours + 1
       ; time_box = 0 when time is 8:00 hrs.
-
       ; create production bar plot
-      if time_box < 30 [
-
-      set time_box hours - 29
-      let total_descargas  num_descargas_zona_norte + num_descargas_zona_sur - temp_total_descargas
-      set temp_total_descargas num_descargas_zona_norte + num_descargas_zona_sur
-      productionsbarplot plotname y.a pencols barwidth step total_descargas time_box
-
+      if time_box < 30
+      [
+        set time_box hours - 29
+        let total_descargas  num_descargas_zona_norte + num_descargas_zona_sur - temp_total_descargas
+        set temp_total_descargas num_descargas_zona_norte + num_descargas_zona_sur
+        productionsbarplot plotname y.a pencols barwidth step total_descargas time_box
       ]
     ]
-
-
-
   ]
 
+  ;; ENTREGA EL TURNO PARA ZONA DE CARGA AL SIGUIENTE CAMION
+
+     set num_turtle count turtles with [uploading = 1 and pxcor = -19 and pycor = -1 and heading = 270 ]
 
 
-
-end
-
-
-to productionsbarplot [plotname ydata pencols barwidth step num_total_descargas box ]
-
-  ;; Get n from ydata -> number of groups (colors)
-  let n length ydata
-  let i 0
-
-
-  ;show ydata
-  ;show  item 1 ydata
-  ;set ydata replace-item 1 ydata 69
-  set ydata replace-item box ydata num_total_descargas
-  ;show ydata
-
-  let y ydata
-  let x [0 6 12 18 24 30 36 42 48 54 60 66 72 78 84 90 96]
-
-   ;; Initialize the plot (create a pen, set the color, set to bar mode and set plot-pen interval)
-    set-current-plot plotname
-    create-temporary-plot-pen (word i)
-    set-plot-pen-color 56
-    set-plot-pen-mode 1
-    set-plot-pen-interval step
-
-
-   ;; Loop over xy values from the two lists:
-    let j 0
-    while [j < length x]
+    if num_turtle < max_camiones_carga and length tail_uploading > 0
     [
-      ;; Select current item from x and y and set x.max for current bar, depending on barwidth
-      let x.temp item j x
-      let x.max x.temp + (barwidth * 0.97)
-      let y.temp item j y
+      let next_truck first tail_uploading
+      next_turn_uploading next_truck ]
 
-      ;; Loop over x-> xmax and plot repeatedly with increasing x.temp to create a filled barplot
-      while [x.temp < x.max]
-      [
-        plotxy x.temp y.temp
-        set x.temp (x.temp + step)
-      ] ;; End of x->xmax loop
-      set j (j + 1)
-    ] ;; End of dataloop for current group (i)
+    ;; ENTREGA EL TURNO PARA ZONA DE DESCARGA AL SIGUIENTE CAMION EN ZONA DE DESCARGA  NORTE
+
+     set num_turtle_zn count turtles with [downloading = 1 and pxcor = 23 and pycor = 0 and heading = 90 ]
+     print num_turtle_zn
+     print tail_downloading_zn
+
+    if num_turtle_zn < max_camiones_desc_zn and length tail_downloading_zn > 0
+    [
+      let next_truck_zn first tail_downloading_zn
+      next_turn_downloading next_truck_zn ]
+
+    ;; ENTREGA EL TURNO PARA ZONA DE DESCARGA AL SIGUIENTE CAMION EN ZONA DE DESCARGA  SUR
+
+     set num_turtle_zs count turtles with [downloading = 1 and pxcor = 31 and pycor = -36 and heading = 90 ]
+     print num_turtle_zs
+     print tail_downloading_zs
+
+    if num_turtle_zs < max_camiones_desc_zs and length tail_downloading_zs > 0
+    [
+      let next_truck_zs first tail_downloading_zs
+      next_turn_downloading next_truck_zs ]
 
 
+end    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FIN GO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; PROCEDIMIENTOS DE AGENTES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+to next_turn_uploading [ntruck]
 
+   ask turtles with [who = ntruck]
+    [
+       set speed mi_velocidad_inicial
+       set reposo? false
+       set tail_uploading remove-item 0 tail_uploading
+   ]
+end
 
+to next_turn_downloading [ntruck]
 
+   ask turtles with [who = ntruck]
+    [
+       set speed mi_velocidad_inicial
+       set reposo? false
+       set tail_downloading_zn remove-item 0 tail_downloading_zn
+   ]
 end
 
 
-
-to slow-down-car [ car-ahead ] ;; turtle procedure
-  ;; slow down so you are driving more slowly than the car ahead of you
-
+to slow-down-car [ car-ahead ] ;; turtle procedure slow down so you are driving more slowly than the car ahead of you
   set speed [ speed ] of car-ahead - desaceleracion
 end
 
 to speed-up-car ;; turtle procedure
   set speed speed + aceleracion
-end
-
-
-to descarga-car ;; turtle procedure
-  tick
-
-end
-
-to volver-car ;; turtle procedure
-  set speed speed
-  set color blue
-
 end
 
 ;; keep track of the number of stopped turtles and the amount of time a turtle has been stopped
@@ -872,6 +744,54 @@ to record-data-zona-descarga  ;; turtle procedure
   ]
   [ set last-wait-time-descarga 0 ]
 end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; PLOTEO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to productionsbarplot [plotname ydata pencols barwidth step num_total_descargas box ]
+
+  ;; Get n from ydata -> number of groups (colors)
+  let n length ydata
+  let i 0
+
+  ;show ydata
+  ;show  item 1 ydata
+  ;set ydata replace-item 1 ydata 69
+  set ydata replace-item box ydata num_total_descargas
+  ;show ydata
+
+  let y ydata
+  let x [0 6 12 18 24 30 36 42 48 54 60 66 72 78 84 90 96]
+
+   ;; Initialize the plot (create a pen, set the color, set to bar mode and set plot-pen interval)
+    set-current-plot plotname
+    create-temporary-plot-pen (word i)
+    set-plot-pen-color 56
+    set-plot-pen-mode 1
+    set-plot-pen-interval step
+
+   ;; Loop over xy values from the two lists:
+    let j 0
+    while [j < length x]
+    [
+      ;; Select current item from x and y and set x.max for current bar, depending on barwidth
+      let x.temp item j x
+      let x.max x.temp + (barwidth * 0.97)
+      let y.temp item j y
+
+      ;; Loop over x-> xmax and plot repeatedly with increasing x.temp to create a filled barplot
+      while [x.temp < x.max]
+      [
+        plotxy x.temp y.temp
+        set x.temp (x.temp + step)
+      ] ;; End of x->xmax loop
+      set j (j + 1)
+    ] ;; End of dataloop for current group (i)
+end
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; REPORTES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to record-production [quien zone down lw wt]
 
@@ -939,7 +859,7 @@ to simulation_report  ;; Report of main information of simulation
   csv:to-file "simulation-preparation.csv" preparation
   csv:to-file "simulation-loading.csv" loading
   csv:to-file "simulation-launching.csv" launching
-    csv:to-file "simulation-production.csv" production
+  csv:to-file "simulation-production.csv" production
   print "Archivo creado!"
 
 end
@@ -1020,8 +940,8 @@ SLIDER
 numero-de-camiones-flota1
 numero-de-camiones-flota1
 1
-41
-15.0
+20
+12.0
 1
 1
 NIL
@@ -1112,7 +1032,7 @@ tiempo-min-de-descarga
 tiempo-min-de-descarga
 1
 60
-10.0
+16.0
 1
 1
 NIL
@@ -1126,8 +1046,8 @@ SLIDER
 velocidad-limite
 velocidad-limite
 0
-2
-1.5
+1
+1.0
 0.1
 1
 NIL
@@ -1160,7 +1080,7 @@ tiempo-max-de-carga
 tiempo-max-de-carga
 1
 100
-18.0
+29.0
 1
 1
 NIL
@@ -1175,7 +1095,7 @@ tiempo-max-de-descarga
 tiempo-max-de-descarga
 1
 100
-22.0
+29.0
 1
 1
 NIL
@@ -1231,7 +1151,7 @@ SLIDER
 numero-de-camiones-flota2
 numero-de-camiones-flota2
 1
-100
+20
 15.0
 1
 1
@@ -1271,7 +1191,7 @@ Descargas
 0.0
 70.0
 0.0
-20.0
+22.0
 true
 true
 "" ""
@@ -1297,7 +1217,7 @@ SLIDER
 %_camiones_lentos
 0
 25
-10.0
+15.0
 1
 1
 NIL
@@ -1444,8 +1364,8 @@ SLIDER
 velocidad-limite-lentos
 velocidad-limite-lentos
 0
-2
-1.0
+1
+0.7
 0.1
 1
 NIL
@@ -1467,6 +1387,51 @@ NIL
 NIL
 NIL
 1
+
+SLIDER
+480
+210
+667
+243
+max_camiones_carga
+max_camiones_carga
+1
+100
+4.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+480
+245
+665
+278
+max_camiones_desc_zn
+max_camiones_desc_zn
+1
+100
+1.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+477
+280
+667
+313
+max_camiones_desc_zs
+max_camiones_desc_zs
+1
+100
+1.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## QUE ES?
