@@ -115,8 +115,7 @@ to setup-cars
     set size 0.8
     set xcor -22
     set heading 90
-    ;set speed 0.27 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
-    set speed random-normal 0.8 0.1       ; 32 km/hora = 0,27 pt/ticks
+    set speed random-normal Velocidad 0.01       ; 32 km/hora = 0,27 pt/ticks ; 50 km/hora = 0,42 pt/ticks ; 95 km/hora = 0,80 pt/ticks
     set speed-min 0
     set wait-time 0
     set return 0
@@ -134,8 +133,7 @@ to setup-cars
     set time_finish_lunch 0
     set cargado_inicio? false
     set ready? false
-    ;set preparation_time (40  + random 40) * 4 ; 1 minuto = 4 ticks
-    set preparation_time random-normal 326 302
+    set preparation_time random-normal Media_perdida_inicio_turno Std_perdida_inicio_turno
     set mi_velocidad_limite velocidad-limite
     set mi_velocidad_inicial speed
     set reposo? false
@@ -150,8 +148,7 @@ to setup-cars
     set xcor -22
     set shape "truck"
     set heading 90
-    ;set speed 0.27 + random-float 0.009  ; 32 km/hora = 0,27 pt/ticks
-    set speed random-normal 0.8 0.1  ; 32 km/hora = 0,27 pt/ticks
+    set speed random-normal Velocidad 0.01  ; 32 km/hora = 0,27 pt/ticks
     set speed-min 0
     set wait-time 0
     set return 0
@@ -169,8 +166,7 @@ to setup-cars
     set time_finish_lunch 0
     set cargado_inicio? false
     set ready? false
-    ;set preparation_time (40  + random 40) * 4 ; 1 minuto = 4 ticks
-    set preparation_time random-normal 326 302
+    set preparation_time random-normal Media_perdida_inicio_turno Std_perdida_inicio_turno
     set mi_velocidad_limite velocidad-limite
     set mi_velocidad_inicial speed
     set reposo? false
@@ -185,7 +181,7 @@ to setup_inicio_cars
   ask n-of camiones_cargados_inicio_flota1 turtles with [flota = 1] [ set cargado_inicio? true set xcor -20]   ;; selecciona al azar turtles cargadas al azar
   ask n-of camiones_cargados_inicio_flota2 turtles with [flota = 2] [ set cargado_inicio? true set xcor -20]   ;; selecciona al azar turtles cargadas al azar
   ask turtles with [cargado_inicio? = false] [set ycor -1 set xcor  -17 set heading 270 set shape "truck-flip" ]
-  ask n-of  ((numero-de-camiones-flota1 + numero-de-camiones-flota2) * %_camiones_lentos / 100 ) turtles [ set lento? true set mi_velocidad_limite velocidad-limite-lentos  set speed speed * 0.7 set mi_velocidad_inicial speed  ]   ;; selecciona al azar turtles lentas
+  ask n-of  ((numero-de-camiones-flota1 + numero-de-camiones-flota2) * %_camiones_lentos / 100 ) turtles [ set lento? true set mi_velocidad_limite velocidad-limite-lentos  set speed speed * 0.5 set mi_velocidad_inicial speed  ]   ;; selecciona al azar turtles lentas
 end
 
 to setup-time
@@ -261,7 +257,7 @@ to go
       ifelse car-ahead != nobody [ slow-down-car car-ahead ] [ speed-up-car ] ;; otherwise, speed up
     ]
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; PRIMER TURNO DE ALMUERZO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    if time_box >= 5 and time_box <= 6 and way = 0 and uploading != 1 and comido? = false and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= 3
+    if time_box >= 4 and time_box <= 5 and way = 0 and uploading != 1 and comido? = false and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= 3
       [
       if (capacity_max_lunch_t1 < capacidad_maxima_casino )
         [
@@ -272,7 +268,7 @@ to go
         ]
       ]
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; SEGUNDO TURNO DE ALMUERZO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    if time_box >= 6 and way = 0 and uploading != 1 and comido? = false and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= 3
+    if time_box >= 5 and way = 0 and uploading != 1 and comido? = false and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= 3
       [
        set camiones_a_comer_flota1_t2 camiones_a_comer_flota1_t2 + 1
        set capacity_max_lunch_t2 capacity_max_lunch_t2 + 1
@@ -308,19 +304,17 @@ to go
       set comido? true
       ]
 
-
-; ANTES DE LLEGAR A LA ZONA DE CARGA, SI HAY N CAMIONES CARGANDO REPOSA EN LA ZONA DESCARGA POS X -18, Y -1
+;;;;;;;;;;;;;;;;;;;;;;; ANTES DE LLEGAR A LA ZONA DE CARGA, SI HAY N CAMIONES CARGANDO REPOSA EN LA ZONA DESCARGA POS X -19, Y -1 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
       if [pxcor] of patch-ahead 1 = -19 and [pycor] of patch-ahead 1 = -1 and heading = 270 and count turtles with [uploading = 1 and pxcor = -19 and pycor = -1] >= max_camiones_carga and reposo? = false
       [ set color black set speed 0 set reposo? true  set tail_uploading lput who tail_uploading set xcor -18 set ycor -1]
 
- ; ANTES DE LLEGAR A LA ZONA DE DESCARGA, SI HAY N CAMIONES DESCARGANDO REPOSA EN LA ZONA DESCARGA POS X 22, Y 0
+;;;;;;;;;;;;;;;;;;;;;;; ANTES DE LLEGAR A LA ZONA DE DESCARGA, SI HAY N CAMIONES DESCARGANDO REPOSA EN LA ZONA DESCARGA POS X 22, Y 0 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
       if [pxcor] of patch-ahead 1 = 23 and [pycor] of patch-ahead 1 = 0 and heading = 90 and count turtles with [downloading = 1 and pxcor = 23 and pycor = 0] >= max_camiones_desc_zn and reposo? = false
       [ set color black set speed 0 set reposo? true  set tail_downloading_zn lput who tail_downloading_zn set xcor 22 set ycor 0]
 
-
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; CAMION AVANZA Y AJUSTA SU VELOCIDAD  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; CAMION AVANZA Y AJUSTA SU VELOCIDAD  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     if comiendo? != true and reposo? = false
       [
 
@@ -334,11 +328,7 @@ to go
     record-data-zona-carga
   ]
 
-
-
-
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FIN FLOTA 1 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FIN FLOTA 1 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FLOTA 2 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ask turtles with [flota = 2 and turno_finalizado? = false and ready? = true]
@@ -378,7 +368,7 @@ to go
       set shape "truck-flip"
       ]
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; PRIMER TURNO DE ALMUERZO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    if time_box >= 5 and time_box <= 6 and way = 0 and uploading != 1 and comido? = false  and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= 3
+    if time_box >= 4 and time_box <= 5 and way = 0 and uploading != 1 and comido? = false  and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= 3
       [
       if (capacity_max_lunch_t1 < capacidad_maxima_casino)
         [
@@ -389,7 +379,7 @@ to go
         ]
       ]
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; SEGUNDO TURNO DE ALMUERZO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    if time_box >= 6 and way = 0 and uploading != 1 and comido? = false and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= 3
+    if time_box >= 5 and way = 0 and uploading != 1 and comido? = false and comiendo? = false and comer? = false and [ pxcor ] of patch-here >= 3
       [
        set camiones_a_comer_flota2_t2 camiones_a_comer_flota2_t2 + 1
        set capacity_max_lunch_t2 capacity_max_lunch_t2 + 1
@@ -429,14 +419,14 @@ to go
       ]
 
 
-; ANTES DE LLEGAR A LA ZONA DE CARGA X -19, Y -1, SI HAY N CAMIONES CARGANDO REPOSA EN LA ZONA DESCARGA POS X -18, Y -1
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ANTES DE LLEGAR A LA ZONA DE CARGA X -19, Y -1, SI HAY N CAMIONES CARGANDO REPOSA EN LA ZONA DESCARGA POS X -18, Y -1 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
       if [pxcor] of patch-ahead 1 = -19 and [pycor] of patch-ahead 1 = -1 and heading = 270 and count turtles with [uploading = 1 and pxcor = -19 and pycor = -1] >= max_camiones_carga and reposo? = false
       [ set color black set speed 0 set reposo? true  set tail_uploading lput who tail_uploading set xcor -18 set ycor -1] ; set turn of trucks at repose zone
 
-; ANTES DE LLEGAR A LA ZONA DE DESCARGA, SI HAY N CAMIONES DESCARGANDO REPOSA EN LA ZONA DESCARGA SUR POS X 30, Y -36
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ANTES DE LLEGAR A LA ZONA DE DESCARGA, SI HAY N CAMIONES DESCARGANDO REPOSA EN LA ZONA DESCARGA SUR POS X 30, Y -36 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-      if [pxcor] of patch-ahead 1 = 30 and [pycor] of patch-ahead 1 = -36 and heading = 90 and count turtles with [downloading = 1 and pxcor = 31 and pycor = -36] >= max_camiones_desc_zn and reposo? = false
+      if [pxcor] of patch-ahead 1 = 31 and [pycor] of patch-ahead 1 = -36 and heading = 90 and count turtles with [downloading = 1 and pxcor = 31 and pycor = -36] >= max_camiones_desc_zn and reposo? = false
       [ set color black set speed 0 set reposo? true  set tail_downloading_zn lput who tail_downloading_zn set xcor 30 set ycor -36]
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; CAMION AVANZA Y AJUSTA SU VELOCIDAD ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -523,7 +513,7 @@ to go
 
     ask turtles-here with [flota = 1 and ready? = true]
     [
-      if time_box < 10 and turno_finalizado? = false
+      if time_box < Hora_termino_turno and turno_finalizado? = false
       [
         if comer? != true
         [
@@ -559,7 +549,7 @@ to go
           rt 180
         ]
       ]
-      if time_box >= 10 and turno_finalizado? != true    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FINALIZACION DEL TURNO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      if time_box >= Hora_termino_turno and turno_finalizado? != true    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FINALIZACION DEL TURNO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       [
         set turno_finalizado? true
         set xcor -22
@@ -576,7 +566,7 @@ to go
 
     ask turtles-here with [flota = 2 and ready? = true]
     [
-      if time_box < 10 and turno_finalizado? = false
+      if time_box < Hora_termino_turno and turno_finalizado? = false
       [
         if comer? != true
         [
@@ -611,7 +601,7 @@ to go
           rt 180
         ]
       ]
-      if time_box >= 10 and turno_finalizado? != true    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FINALIZACION DEL TURNO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+      if time_box >= Hora_termino_turno and turno_finalizado? != true    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; FINALIZACION DEL TURNO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
       [
         set turno_finalizado? true
         set xcor -22
@@ -662,8 +652,8 @@ to go
     ;; ENTREGA EL TURNO PARA ZONA DE DESCARGA AL SIGUIENTE CAMION EN ZONA DE DESCARGA  NORTE
 
      set num_turtle_zn count turtles with [downloading = 1 and pxcor = 23 and pycor = 0 and heading = 90 ]
-     print num_turtle_zn
-     print tail_downloading_zn
+;     print num_turtle_zn
+;     print tail_downloading_zn
 
     if num_turtle_zn < max_camiones_desc_zn and length tail_downloading_zn > 0
     [
@@ -673,8 +663,8 @@ to go
     ;; ENTREGA EL TURNO PARA ZONA DE DESCARGA AL SIGUIENTE CAMION EN ZONA DE DESCARGA  SUR
 
      set num_turtle_zs count turtles with [downloading = 1 and pxcor = 31 and pycor = -36 and heading = 90 ]
-     print num_turtle_zs
-     print tail_downloading_zs
+;     print num_turtle_zs
+;     print tail_downloading_zs
 
     if num_turtle_zs < max_camiones_desc_zs and length tail_downloading_zs > 0
     [
@@ -709,11 +699,11 @@ end
 
 
 to slow-down-car [ car-ahead ] ;; turtle procedure slow down so you are driving more slowly than the car ahead of you
-  set speed [ speed ] of car-ahead - desaceleracion
+  set speed [ speed ] of car-ahead - 0.01           ;;;;; set speed [ speed ] of car-ahead - desaceleracion
 end
 
 to speed-up-car ;; turtle procedure
-  set speed speed + aceleracion
+  set speed speed + 0.01                     ;;;;;;; set speed speed + aceleracion
 end
 
 ;; keep track of the number of stopped turtles and the amount of time a turtle has been stopped
@@ -872,13 +862,13 @@ end
 ; See Info tab for full copyright and license.
 @#$#@#$#@
 GRAPHICS-WINDOW
-665
--4
-1448
-659
+625
+10
+1278
+563
 -1
 -1
-13.3621
+11.121
 1
 10
 1
@@ -899,9 +889,9 @@ ticks
 300.0
 
 BUTTON
-240
+15
 10
-310
+85
 43
 NIL
 setup
@@ -916,10 +906,10 @@ NIL
 1
 
 BUTTON
-240
-45
-310
-78
+90
+10
+160
+43
 NIL
 go
 T
@@ -934,54 +924,24 @@ NIL
 
 SLIDER
 15
-10
-237
-43
+50
+210
+83
 numero-de-camiones-flota1
 numero-de-camiones-flota1
 1
-20
-12.0
+30
+15.0
 1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-175
-155
-208
-desaceleracion
-desaceleracion
-0
-.0099
-0.0099
-.0001
-1
-NIL
-HORIZONTAL
-
-SLIDER
-10
-135
-155
-168
-aceleracion
-aceleracion
-0
-.0099
-0.0099
-.0001
 1
 NIL
 HORIZONTAL
 
 PLOT
-0
+15
 300
-335
-497
+315
+465
 Velocidad camiones
 time
 speed
@@ -998,10 +958,10 @@ PENS
 "Prom" 1.0 0 -10899396 true "" "plot mean [speed] of turtles"
 
 MONITOR
-350
-85
-440
-130
+295
+250
+355
+295
 Velocidad
 mean [speed] of turtles
 3
@@ -1009,55 +969,55 @@ mean [speed] of turtles
 11
 
 SLIDER
-160
-135
-320
-168
+1295
+55
+1490
+88
 tiempo-min-de-carga
 tiempo-min-de-carga
 1
-60
-14.0
+100
+55.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-325
+1295
 135
-495
+1490
 168
 tiempo-min-de-descarga
 tiempo-min-de-descarga
 1
-60
-16.0
+100
+23.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-500
-135
-665
-168
+1295
+215
+1490
+248
 velocidad-limite
 velocidad-limite
-0
-1
-1.0
+0.5
+0.8
+0.8
 0.1
 1
 NIL
 HORIZONTAL
 
 PLOT
-340
-300
-655
-500
+15
+600
+315
+765
 Tiempo promedio espera camiones
 Tiempo
 Espera promedio
@@ -1072,40 +1032,40 @@ PENS
 "default" 1.0 0 -16777216 true "" "plot mean [last-wait-time] of turtles"
 
 SLIDER
-160
-175
-320
-208
+1295
+95
+1490
+128
 tiempo-max-de-carga
 tiempo-max-de-carga
 1
 100
-29.0
+61.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-325
+1295
 175
-495
+1490
 208
 tiempo-max-de-descarga
 tiempo-max-de-descarga
 1
 100
-29.0
+33.0
 1
 1
 NIL
 HORIZONTAL
 
 MONITOR
-450
-85
-550
-130
+360
+250
+440
+295
 Tiempo Carga
 mean [last-wait-time-carga] of turtles
 2
@@ -1113,10 +1073,10 @@ mean [last-wait-time-carga] of turtles
 11
 
 MONITOR
-555
-85
-665
-130
+445
+250
+540
+295
 Tiempo descarga
 mean [last-wait-time-descarga] of turtles
 2
@@ -1124,10 +1084,10 @@ mean [last-wait-time-descarga] of turtles
 11
 
 PLOT
-0
-505
-335
-670
+320
+600
+620
+765
 Tiempo promedio zonas carga/descarga
 Tiempo
 Espera promedio
@@ -1144,14 +1104,14 @@ PENS
 "Carga f2" 1.0 0 -13840069 true "" "plot mean [last-wait-time-carga] of turtles with [flota = 2]"
 
 SLIDER
-15
-45
-235
-78
+215
+50
+410
+83
 numero-de-camiones-flota2
 numero-de-camiones-flota2
 1
-20
+30
 15.0
 1
 1
@@ -1159,10 +1119,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-320
 15
-385
-60
+250
+65
+295
 Hora
 hours - 21
 0
@@ -1170,10 +1130,10 @@ hours - 21
 11
 
 MONITOR
-395
-15
-460
-60
+70
+250
+120
+295
 Minutos
 minutes
 0
@@ -1181,10 +1141,10 @@ minutes
 11
 
 PLOT
-340
-505
-655
-670
+320
+300
+620
+465
 produccion
 Tiempos
 Descargas
@@ -1198,9 +1158,9 @@ true
 PENS
 
 MONITOR
-270
+545
 250
-357
+620
 295
 # Descargas
 num_descargas_zona_norte + num_descargas_zona_sur
@@ -1209,14 +1169,14 @@ num_descargas_zona_norte + num_descargas_zona_sur
 11
 
 SLIDER
-15
-85
-235
-118
+415
+90
+610
+123
 %_camiones_lentos
 %_camiones_lentos
 0
-25
+50
 15.0
 1
 1
@@ -1224,10 +1184,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-240
-85
-345
-130
+200
+250
+290
+295
 camiones lentos
 (numero-de-camiones-flota1 + numero-de-camiones-flota2) * %_camiones_lentos / 100
 0
@@ -1235,10 +1195,10 @@ camiones lentos
 11
 
 MONITOR
-100
-680
-207
-725
+215
+470
+410
+515
 # comidos f1 t1
 camiones_a_comer_flota1_t1
 0
@@ -1246,10 +1206,10 @@ camiones_a_comer_flota1_t1
 11
 
 MONITOR
-215
-680
-322
-725
+415
+470
+610
+515
 # comidos f2 t1
 camiones_a_comer_flota2_t1
 0
@@ -1257,10 +1217,10 @@ camiones_a_comer_flota2_t1
 11
 
 MONITOR
-105
-730
-212
-775
+215
+520
+410
+565
 # comidos f1 t2
 camiones_a_comer_flota1_t2
 0
@@ -1268,10 +1228,10 @@ camiones_a_comer_flota1_t2
 11
 
 MONITOR
-220
-730
-327
-775
+415
+520
+610
+565
 # comidos f2 t2
 camiones_a_comer_flota2_t2
 0
@@ -1279,25 +1239,25 @@ camiones_a_comer_flota2_t2
 11
 
 SLIDER
-270
-215
-477
-248
+1295
+15
+1490
+48
 capacidad_maxima_casino
 capacidad_maxima_casino
 1
 50
-16.0
+15.0
 1
 1
 NIL
 HORIZONTAL
 
 MONITOR
-0
-680
-100
-725
+15
+470
+210
+515
 a comer turno 1
 capacity_max_lunch_t1
 0
@@ -1305,10 +1265,10 @@ capacity_max_lunch_t1
 11
 
 MONITOR
-0
-730
-100
-775
+15
+520
+210
+565
 a comer turno 2
 capacity_max_lunch_t2
 0
@@ -1316,10 +1276,10 @@ capacity_max_lunch_t2
 11
 
 MONITOR
-470
-15
-557
-60
+125
+250
+195
+295
 Actual Ticks
 actual-time
 0
@@ -1327,29 +1287,29 @@ actual-time
 11
 
 SLIDER
-10
-215
-257
-248
+15
+90
+210
+123
 camiones_cargados_inicio_flota1
 camiones_cargados_inicio_flota1
 0
-50
-1.0
+30
+2.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-10
-255
-260
-288
+215
+90
+410
+123
 camiones_cargados_inicio_flota2
 camiones_cargados_inicio_flota2
 0
-100
+30
 3.0
 1
 1
@@ -1357,25 +1317,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-500
-175
-665
-208
+1295
+255
+1490
+288
 velocidad-limite-lentos
 velocidad-limite-lentos
-0
+0.5
 1
-0.7
+0.5
 0.1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-575
-20
-652
-53
+165
+10
+235
+43
 Reporte
 simulation_report
 NIL
@@ -1389,14 +1349,14 @@ NIL
 1
 
 SLIDER
-480
+15
+130
 210
-667
-243
+163
 max_camiones_carga
 max_camiones_carga
 1
-100
+10
 4.0
 1
 1
@@ -1404,14 +1364,14 @@ NIL
 HORIZONTAL
 
 SLIDER
-480
-245
-665
-278
+215
+130
+410
+163
 max_camiones_desc_zn
 max_camiones_desc_zn
-1
-100
+0
+10
 1.0
 1
 1
@@ -1419,15 +1379,75 @@ NIL
 HORIZONTAL
 
 SLIDER
-477
-280
-667
-313
+415
+130
+610
+163
 max_camiones_desc_zs
 max_camiones_desc_zs
-1
-100
+0
+10
 1.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+15
+170
+210
+203
+Media_perdida_inicio_turno
+Media_perdida_inicio_turno
+0
+400
+326.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+215
+170
+410
+203
+Std_perdida_inicio_turno
+Std_perdida_inicio_turno
+0
+400
+302.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+415
+50
+610
+83
+Velocidad
+Velocidad
+0
+0.8
+0.8
+0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+415
+170
+610
+203
+Hora_termino_turno
+Hora_termino_turno
+10
+11
+11.0
 1
 1
 NIL
@@ -1916,6 +1936,234 @@ setup
 repeat 180 [ go ]
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="Validacion" repetitions="40" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2880"/>
+    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
+    <enumeratedValueSet variable="camiones_cargados_inicio_flota1">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="capacidad_maxima_casino">
+      <value value="13"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="tiempo-max-de-carga">
+      <value value="61"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="camiones_cargados_inicio_flota2">
+      <value value="3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_camiones_desc_zs">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="numero-de-camiones-flota1">
+      <value value="13"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="numero-de-camiones-flota2">
+      <value value="13"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_camiones_carga">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_camiones_desc_zn">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="tiempo-min-de-descarga">
+      <value value="23"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Media_perdida_inicio_turno">
+      <value value="326"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Velocidad">
+      <value value="0.8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="tiempo-max-de-descarga">
+      <value value="33"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Hora_termino_turno">
+      <value value="11"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="tiempo-min-de-carga">
+      <value value="55"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="%_camiones_lentos">
+      <value value="15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Std_perdida_inicio_turno">
+      <value value="302"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="velocidad-limite-lentos">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="velocidad-limite">
+      <value value="0.8"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Eventos_cercania" repetitions="20" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2880"/>
+    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
+    <enumeratedValueSet variable="%_camiones_lentos">
+      <value value="5"/>
+      <value value="50"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Camiones_cargados_fin_turno" repetitions="20" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2880"/>
+    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
+    <enumeratedValueSet variable="camiones_cargados_inicio_flota1">
+      <value value="1"/>
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="camiones_cargados_inicio_flota2">
+      <value value="1"/>
+      <value value="10"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Perdidas_inicio_turno" repetitions="20" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2880"/>
+    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
+    <enumeratedValueSet variable="Media_perdida_inicio_turno">
+      <value value="60"/>
+      <value value="326"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Std_perdida_inicio_turno">
+      <value value="60"/>
+      <value value="302"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Perdidas_fin_turno" repetitions="20" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2880"/>
+    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
+    <enumeratedValueSet variable="Hora_termino_turno">
+      <value value="10"/>
+      <value value="11"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Cantidad_excavadora" repetitions="20" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2880"/>
+    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
+    <enumeratedValueSet variable="max_camiones_carga">
+      <value value="1"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Cantidad_zona_descarga" repetitions="20" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2880"/>
+    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
+    <enumeratedValueSet variable="max_camiones_desc_zs">
+      <value value="1"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_camiones_desc_zn">
+      <value value="1"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Cantidad_camiones" repetitions="20" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2880"/>
+    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
+    <enumeratedValueSet variable="numero-de-camiones-flota1">
+      <value value="10"/>
+      <value value="30"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="numero-de-camiones-flota2">
+      <value value="10"/>
+      <value value="30"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Velocidad_camiones" repetitions="20" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2880"/>
+    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
+    <enumeratedValueSet variable="Velocidad">
+      <value value="0.5"/>
+      <value value="0.8"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="experiment" repetitions="290" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2880"/>
+    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
+    <enumeratedValueSet variable="camiones_cargados_inicio_flota1">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="capacidad_maxima_casino">
+      <value value="15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="tiempo-max-de-carga">
+      <value value="61"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="camiones_cargados_inicio_flota2">
+      <value value="3"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_camiones_desc_zs">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="numero-de-camiones-flota1">
+      <value value="12"/>
+      <value value="15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="numero-de-camiones-flota2">
+      <value value="12"/>
+      <value value="15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_camiones_carga">
+      <value value="4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="max_camiones_desc_zn">
+      <value value="1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="tiempo-min-de-descarga">
+      <value value="23"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Media_perdida_inicio_turno">
+      <value value="326"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Velocidad">
+      <value value="0.5"/>
+      <value value="0.8"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="tiempo-max-de-descarga">
+      <value value="33"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Hora_termino_turno">
+      <value value="10"/>
+      <value value="11"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="tiempo-min-de-carga">
+      <value value="55"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="%_camiones_lentos">
+      <value value="15"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Std_perdida_inicio_turno">
+      <value value="302"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="velocidad-limite-lentos">
+      <value value="0.5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="velocidad-limite">
+      <value value="0.8"/>
+    </enumeratedValueSet>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default
