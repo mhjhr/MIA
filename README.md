@@ -103,7 +103,7 @@ La flota 1 tiene como objetivo cargar en la zona amarilla y descargar en la zona
 - Total Pérdida
 Tiempo inicio de turno + fin de turno + perdida de la colcacion
 
-#  Reporte
+#  Reporte:
 
 Para utilizar la opción de reporte luego de la simuluación se debe presionar el botén "reporte" que generará 4 archivos con la siguiente información de la simulación con los datos para cada tortuga:
 
