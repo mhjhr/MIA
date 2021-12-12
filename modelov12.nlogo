@@ -286,7 +286,8 @@ to go
         set speed 0
         set comiendo? true
         set time_start_lunch actual-time
-        set time_finish_lunch actual-time + 240 + random 60
+        ;set time_finish_lunch actual-time + 240 + random 60
+        set time_finish_lunch actual-time + 240 + random (540 - 240)
         record-launching who flota time_start_lunch time_finish_lunch
        ]
       ]
@@ -403,7 +404,8 @@ to go
         set speed 0
         set comiendo? true
         set time_start_lunch actual-time
-        set time_finish_lunch actual-time + 240 + random 60
+        ;set time_finish_lunch actual-time + 240 + random 60
+        set time_finish_lunch actual-time + 240 + random (540 - 240)
         record-launching who flota time_start_lunch time_finish_lunch
         ]
       ]
@@ -948,7 +950,7 @@ numero-de-camiones-flota1
 numero-de-camiones-flota1
 1
 30
-15.0
+13.0
 1
 1
 NIL
@@ -994,7 +996,7 @@ tiempo-min-de-carga
 tiempo-min-de-carga
 1
 100
-55.0
+56.0
 1
 1
 NIL
@@ -1009,7 +1011,7 @@ tiempo-min-de-descarga
 tiempo-min-de-descarga
 1
 100
-23.0
+24.0
 1
 1
 NIL
@@ -1039,7 +1041,7 @@ tiempo-max-de-carga
 tiempo-max-de-carga
 1
 100
-61.0
+60.0
 1
 1
 NIL
@@ -1054,7 +1056,7 @@ tiempo-max-de-descarga
 tiempo-max-de-descarga
 1
 100
-33.0
+32.0
 1
 1
 NIL
@@ -1091,7 +1093,7 @@ numero-de-camiones-flota2
 numero-de-camiones-flota2
 1
 30
-15.0
+13.0
 1
 1
 NIL
@@ -1289,7 +1291,7 @@ camiones_cargados_inicio_flota2
 camiones_cargados_inicio_flota2
 0
 30
-3.0
+2.0
 1
 1
 NIL
@@ -1396,7 +1398,7 @@ Std_perdida_inicio_turno
 Std_perdida_inicio_turno
 0
 400
-302.0
+303.0
 1
 1
 NIL
@@ -1916,7 +1918,7 @@ repeat 180 [ go ]
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="Validacion" repetitions="40" runMetricsEveryStep="false">
+  <experiment name="Validacion" repetitions="100" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="2880"/>
@@ -1925,13 +1927,13 @@ repeat 180 [ go ]
       <value value="2"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="capacidad_maxima_casino">
-      <value value="13"/>
+      <value value="15"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="tiempo-max-de-carga">
-      <value value="61"/>
+      <value value="60"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="camiones_cargados_inicio_flota2">
-      <value value="3"/>
+      <value value="2"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max_camiones_desc_zs">
       <value value="1"/>
@@ -1949,7 +1951,7 @@ repeat 180 [ go ]
       <value value="1"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="tiempo-min-de-descarga">
-      <value value="23"/>
+      <value value="24"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="Media_perdida_inicio_turno">
       <value value="326"/>
@@ -1958,19 +1960,19 @@ repeat 180 [ go ]
       <value value="0.8"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="tiempo-max-de-descarga">
-      <value value="33"/>
+      <value value="32"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="Hora_termino_turno">
       <value value="11"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="tiempo-min-de-carga">
-      <value value="55"/>
+      <value value="56"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="%_camiones_lentos">
       <value value="15"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="Std_perdida_inicio_turno">
-      <value value="302"/>
+      <value value="303"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="velocidad-limite-lentos">
       <value value="0.5"/>
@@ -1979,7 +1981,7 @@ repeat 180 [ go ]
       <value value="0.8"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="Eventos_cercania" repetitions="20" runMetricsEveryStep="false">
+  <experiment name="Ajuste_velocidad" repetitions="20" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="2880"/>
@@ -1989,7 +1991,51 @@ repeat 180 [ go ]
       <value value="50"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="Camiones_cargados_fin_turno" repetitions="20" runMetricsEveryStep="false">
+  <experiment name="Velocidad" repetitions="20" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2880"/>
+    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
+    <enumeratedValueSet variable="Velocidad">
+      <value value="0.5"/>
+      <value value="0.8"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Excavadora" repetitions="20" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2880"/>
+    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
+    <enumeratedValueSet variable="max_camiones_carga">
+      <value value="1"/>
+      <value value="8"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Perdida_fin_turno" repetitions="20" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2880"/>
+    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
+    <enumeratedValueSet variable="Hora_termino_turno">
+      <value value="10"/>
+      <value value="11"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Perdida_inicio_turno" repetitions="20" runMetricsEveryStep="false">
+    <setup>setup</setup>
+    <go>go</go>
+    <timeLimit steps="2880"/>
+    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
+    <enumeratedValueSet variable="Media_perdida_inicio_turno">
+      <value value="60"/>
+      <value value="326"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Std_perdida_inicio_turno">
+      <value value="60"/>
+      <value value="303"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="Cargados_fin_turno" repetitions="20" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="2880"/>
@@ -2001,54 +2047,6 @@ repeat 180 [ go ]
     <enumeratedValueSet variable="camiones_cargados_inicio_flota2">
       <value value="1"/>
       <value value="10"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="Perdidas_inicio_turno" repetitions="20" runMetricsEveryStep="false">
-    <setup>setup</setup>
-    <go>go</go>
-    <timeLimit steps="2880"/>
-    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
-    <enumeratedValueSet variable="Media_perdida_inicio_turno">
-      <value value="60"/>
-      <value value="326"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="Std_perdida_inicio_turno">
-      <value value="60"/>
-      <value value="302"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="Perdidas_fin_turno" repetitions="20" runMetricsEveryStep="false">
-    <setup>setup</setup>
-    <go>go</go>
-    <timeLimit steps="2880"/>
-    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
-    <enumeratedValueSet variable="Hora_termino_turno">
-      <value value="10"/>
-      <value value="11"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="Cantidad_excavadora" repetitions="20" runMetricsEveryStep="false">
-    <setup>setup</setup>
-    <go>go</go>
-    <timeLimit steps="2880"/>
-    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
-    <enumeratedValueSet variable="max_camiones_carga">
-      <value value="1"/>
-      <value value="8"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="Cantidad_zona_descarga" repetitions="20" runMetricsEveryStep="false">
-    <setup>setup</setup>
-    <go>go</go>
-    <timeLimit steps="2880"/>
-    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
-    <enumeratedValueSet variable="max_camiones_desc_zs">
-      <value value="1"/>
-      <value value="8"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="max_camiones_desc_zn">
-      <value value="1"/>
-      <value value="8"/>
     </enumeratedValueSet>
   </experiment>
   <experiment name="Cantidad_camiones" repetitions="20" runMetricsEveryStep="false">
@@ -2058,132 +2056,25 @@ repeat 180 [ go ]
     <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
     <enumeratedValueSet variable="numero-de-camiones-flota1">
       <value value="10"/>
-      <value value="30"/>
+      <value value="15"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="numero-de-camiones-flota2">
       <value value="10"/>
-      <value value="30"/>
+      <value value="15"/>
     </enumeratedValueSet>
   </experiment>
-  <experiment name="Velocidad_camiones" repetitions="20" runMetricsEveryStep="false">
+  <experiment name="Zonas_descarga" repetitions="20" runMetricsEveryStep="false">
     <setup>setup</setup>
     <go>go</go>
     <timeLimit steps="2880"/>
     <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
-    <enumeratedValueSet variable="Velocidad">
-      <value value="0.5"/>
-      <value value="0.8"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="experiment" repetitions="290" runMetricsEveryStep="false">
-    <setup>setup</setup>
-    <go>go</go>
-    <timeLimit steps="2880"/>
-    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
-    <enumeratedValueSet variable="camiones_cargados_inicio_flota1">
-      <value value="2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="capacidad_maxima_casino">
-      <value value="15"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="tiempo-max-de-carga">
-      <value value="61"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="camiones_cargados_inicio_flota2">
-      <value value="3"/>
-    </enumeratedValueSet>
     <enumeratedValueSet variable="max_camiones_desc_zs">
       <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="numero-de-camiones-flota1">
-      <value value="12"/>
-      <value value="15"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="numero-de-camiones-flota2">
-      <value value="12"/>
-      <value value="15"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="max_camiones_carga">
-      <value value="4"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="max_camiones_desc_zn">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="tiempo-min-de-descarga">
-      <value value="23"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="Media_perdida_inicio_turno">
-      <value value="326"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="Velocidad">
-      <value value="0.5"/>
-      <value value="0.8"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="tiempo-max-de-descarga">
-      <value value="33"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="Hora_termino_turno">
-      <value value="10"/>
-      <value value="11"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="tiempo-min-de-carga">
-      <value value="55"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="%_camiones_lentos">
-      <value value="15"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="Std_perdida_inicio_turno">
-      <value value="302"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="velocidad-limite-lentos">
-      <value value="0.5"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="velocidad-limite">
-      <value value="0.8"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="Cantidad_zona_descarga - 1" repetitions="20" runMetricsEveryStep="false">
-    <setup>setup</setup>
-    <go>go</go>
-    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
-    <enumeratedValueSet variable="max_camiones_desc_zs">
-      <value value="1"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="max_camiones_desc_zn">
-      <value value="1"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="Cantidad_zona_descarga - 8" repetitions="20" runMetricsEveryStep="false">
-    <setup>setup</setup>
-    <go>go</go>
-    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
-    <enumeratedValueSet variable="max_camiones_desc_zs">
       <value value="8"/>
     </enumeratedValueSet>
     <enumeratedValueSet variable="max_camiones_desc_zn">
+      <value value="1"/>
       <value value="8"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="Cantidad_zona_descarga - 2" repetitions="20" runMetricsEveryStep="false">
-    <setup>setup</setup>
-    <go>go</go>
-    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
-    <enumeratedValueSet variable="max_camiones_desc_zs">
-      <value value="2"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="max_camiones_desc_zn">
-      <value value="2"/>
-    </enumeratedValueSet>
-  </experiment>
-  <experiment name="Cantidad_zona_descarga - 4" repetitions="20" runMetricsEveryStep="false">
-    <setup>setup</setup>
-    <go>go</go>
-    <metric>num_descargas_zona_norte + num_descargas_zona_sur</metric>
-    <enumeratedValueSet variable="max_camiones_desc_zs">
-      <value value="4"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="max_camiones_desc_zn">
-      <value value="4"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
